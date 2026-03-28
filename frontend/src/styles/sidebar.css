@@ -1,0 +1,48 @@
+/* ============================================================
+   Collapsible Sidebar – Transition & Animation Styles
+   ============================================================ */
+
+/* Smooth width transition for the MUI Drawer paper */
+.sidebar-drawer-paper {
+  transition: width 0.3s ease !important;
+  overflow: hidden !important;
+  white-space: nowrap;
+}
+
+/* Brand logo text – fade out when sidebar collapses */
+.sidebar-brand-text {
+  transition: opacity 0.2s ease, max-width 0.3s ease;
+  overflow: hidden;
+}
+
+.sidebar-brand-text.hidden {
+  opacity: 0;
+  max-width: 0;
+}
+
+/* Nav item label – slide & fade */
+.sidebar-label {
+  transition: opacity 0.2s ease 0.05s, max-width 0.3s ease;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sidebar-label.hidden {
+  opacity: 0;
+  max-width: 0;
+}
+
+/* Toggle button */
+.sidebar-toggle-btn {
+  transition: transform 0.3s ease;
+}
+
+.sidebar-toggle-btn.collapsed {
+  transform: rotate(180deg);
+}
+
+/* Avatar pulse on hover */
+.sidebar-avatar:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}

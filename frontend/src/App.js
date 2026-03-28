@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CssBaseline, Box } from '@mui/material';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import Sidebar from './components/Layout/Sidebar';
+import Sidebar, { EXPANDED_WIDTH, COLLAPSED_WIDTH } from './components/Layout/Sidebar';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
@@ -23,7 +23,7 @@ const theme = createTheme({
     warning: { main: '#F59E0B' },
     error: { main: '#EF4444' },
     info: { main: '#3B82F6' },
-    background: { default: '#F0FDF4' },
+    background: { default: '#f0fdf4' },
   },
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -36,13 +36,31 @@ const theme = createTheme({
     },
     MuiCard: {
       styleOverrides: {
-        root: { borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' },
+        root: {
+          borderRadius: 16,
+          background: 'rgba(255, 255, 255, 0.92)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255, 255, 255, 0.4)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            background: 'rgba(255, 255, 255, 0.98)',
+            boxShadow: '0 12px 40px rgba(0, 0, 0, 0.14)',
+            transform: 'translateY(-4px)',
+          },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+        },
       },
     },
   },
 });
-
-const DRAWER_WIDTH = 240;
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
@@ -50,17 +68,26 @@ function ProtectedRoute({ children }) {
 }
 
 function AppLayout({ children }) {
+  const { sidebarCollapsed } = useAuth();
+  const drawerWidth = sidebarCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
+
   return (
-    <Box sx={{ display: 'flex' }}>
-      <Sidebar drawerWidth={DRAWER_WIDTH} />
+    <Box
+      className="app-background"
+      sx={{ display: 'flex', minHeight: '100vh' }}
+    >
+      <Sidebar />
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
-          width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
+          p: { xs: 2, sm: 3 },
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          ml: { sm: 0 },
           minHeight: '100vh',
-          backgroundColor: 'background.default',
+          transition: 'width 0.3s ease',
+          // Small top offset on mobile to clear the hamburger button
+          pt: { xs: 7, sm: 3 },
         }}
       >
         {children}
