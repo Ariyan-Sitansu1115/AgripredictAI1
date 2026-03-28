@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
-  Box, Typography, Divider, IconButton, useTheme, useMediaQuery, Tooltip,
-  Avatar,
+  Box, Typography, Divider, IconButton, Tooltip, Avatar,
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -17,6 +16,7 @@ import StorageIcon from '@mui/icons-material/Storage';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
+import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import AgricultureIcon from '@mui/icons-material/Agriculture';
 import { useAuth } from '../../context/AuthContext';
 
@@ -32,17 +32,30 @@ const NAV_ITEMS = [
   { label: 'Data Sources', path: '/data-sources', icon: <StorageIcon /> },
 ];
 
-export default function Sidebar({ drawerWidth }) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [mobileOpen, setMobileOpen] = useState(false);
+export const EXPANDED_WIDTH = 250;
+export const COLLAPSED_WIDTH = 70;
+
+export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, sidebarCollapsed, toggleSidebar } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Keyboard shortcut: Alt+S toggles sidebar
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.altKey && e.key === 's') {
+        e.preventDefault();
+        toggleSidebar();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleSidebar]);
 
   const handleNavClick = (path) => {
     navigate(path);
-    if (isMobile) setMobileOpen(false);
+    setMobileOpen(false);
   };
 
   const handleLogout = () => {
@@ -50,63 +63,142 @@ export default function Sidebar({ drawerWidth }) {
     navigate('/login');
   };
 
+  const drawerWidth = sidebarCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
+
+  // Shared content for both mobile & desktop drawers
   const drawerContent = (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Brand */}
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1, bgcolor: 'primary.main' }}>
-        <AgricultureIcon sx={{ color: 'white', fontSize: 32 }} />
-        <Box>
-          <Typography variant="subtitle1" sx={{ color: 'white', fontWeight: 700, lineHeight: 1.2 }}>
-            AgripredictAI
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-            Smart Farming
-          </Typography>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        overflowX: 'hidden',
+      }}
+    >
+      {/* ── Brand + Toggle ── */}
+      <Box
+        sx={{
+          p: sidebarCollapsed ? 1 : 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: sidebarCollapsed ? 'center' : 'space-between',
+          bgcolor: 'primary.main',
+          minHeight: 64,
+          transition: 'padding 0.3s ease',
+        }}
+      >
+        {/* Logo icon always visible */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, overflow: 'hidden' }}>
+          <AgricultureIcon sx={{ color: 'white', fontSize: 30, flexShrink: 0 }} />
+          {!sidebarCollapsed && (
+            <Box>
+              <Typography
+                variant="subtitle1"
+                sx={{ color: 'white', fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}
+              >
+                AgripredictAI
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                Smart Farming
+              </Typography>
+            </Box>
+          )}
         </Box>
+
+        {/* Toggle button – desktop only */}
+        <Tooltip title={sidebarCollapsed ? 'Expand sidebar (Alt+S)' : 'Collapse sidebar (Alt+S)'} placement="right">
+          <IconButton
+            onClick={toggleSidebar}
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            size="small"
+            sx={{
+              color: 'white',
+              ml: sidebarCollapsed ? 0 : 1,
+              '&:hover': { bgcolor: 'rgba(255,255,255,0.15)' },
+              display: { xs: 'none', sm: 'flex' },
+              flexShrink: 0,
+            }}
+          >
+            {sidebarCollapsed ? <MenuIcon /> : <MenuOpenIcon />}
+          </IconButton>
+        </Tooltip>
       </Box>
 
-      {/* User Info */}
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1, bgcolor: '#065F46' }}>
-        <Avatar sx={{ bgcolor: 'primary.main', width: 36, height: 36 }}>
-          <PersonIcon sx={{ fontSize: 20 }} />
-        </Avatar>
-        <Box>
-          <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
-            {user?.name || user?.email || 'Farmer'}
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
-            {user?.location || 'India'}
-          </Typography>
-        </Box>
+      {/* ── User Info ── */}
+      <Box
+        sx={{
+          p: sidebarCollapsed ? 1 : 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+          gap: sidebarCollapsed ? 0 : 1,
+          bgcolor: '#065F46',
+          transition: 'padding 0.3s ease',
+        }}
+      >
+        <Tooltip title={sidebarCollapsed ? (user?.name || user?.email || 'Farmer') : ''} placement="right">
+          <Avatar
+            className="sidebar-avatar"
+            sx={{ bgcolor: 'primary.main', width: 36, height: 36, flexShrink: 0, cursor: 'default' }}
+          >
+            <PersonIcon sx={{ fontSize: 20 }} />
+          </Avatar>
+        </Tooltip>
+        {!sidebarCollapsed && (
+          <Box sx={{ overflow: 'hidden' }}>
+            <Typography
+              variant="body2"
+              sx={{ color: 'white', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            >
+              {user?.name || user?.email || 'Farmer'}
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+              {user?.location || 'India'}
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       <Divider />
 
-      {/* Navigation */}
-      <List sx={{ flexGrow: 1, pt: 1 }}>
+      {/* ── Navigation ── */}
+      <List sx={{ flexGrow: 1, pt: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         {NAV_ITEMS.map(({ label, path, icon }) => {
           const isActive = location.pathname === path;
           return (
-            <ListItem key={path} disablePadding>
-              <Tooltip title={label} placement="right" disableHoverListener>
+            <ListItem key={path} disablePadding sx={{ display: 'block' }}>
+              <Tooltip title={sidebarCollapsed ? label : ''} placement="right" arrow>
                 <ListItemButton
                   onClick={() => handleNavClick(path)}
+                  aria-label={label}
                   sx={{
                     mx: 1,
                     borderRadius: 2,
                     mb: 0.5,
+                    justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                    px: sidebarCollapsed ? 1 : 2,
                     bgcolor: isActive ? 'primary.main' : 'transparent',
                     '&:hover': { bgcolor: isActive ? 'primary.dark' : 'action.hover' },
                     color: isActive ? 'white' : 'text.primary',
+                    transition: 'padding 0.3s ease',
+                    minWidth: 0,
                   }}
                 >
-                  <ListItemIcon sx={{ minWidth: 40, color: isActive ? 'white' : 'primary.main' }}>
+                  <ListItemIcon
+                    sx={{
+                      minWidth: sidebarCollapsed ? 0 : 40,
+                      color: isActive ? 'white' : 'primary.main',
+                      justifyContent: 'center',
+                    }}
+                  >
                     {icon}
                   </ListItemIcon>
-                  <ListItemText
-                    primary={label}
-                    primaryTypographyProps={{ fontSize: 14, fontWeight: isActive ? 600 : 400 }}
-                  />
+                  {!sidebarCollapsed && (
+                    <ListItemText
+                      primary={label}
+                      primaryTypographyProps={{ fontSize: 14, fontWeight: isActive ? 600 : 400, noWrap: true }}
+                    />
+                  )}
                 </ListItemButton>
               </Tooltip>
             </ListItem>
@@ -116,19 +208,55 @@ export default function Sidebar({ drawerWidth }) {
 
       <Divider />
 
-      {/* Bottom actions */}
-      <List>
+      {/* ── Bottom Actions ── */}
+      <List sx={{ pb: 1 }}>
+        {/* Profile */}
         <ListItem disablePadding>
-          <ListItemButton onClick={() => handleNavClick('/profile')} sx={{ mx: 1, borderRadius: 2 }}>
-            <ListItemIcon sx={{ minWidth: 40, color: 'primary.main' }}><PersonIcon /></ListItemIcon>
-            <ListItemText primary="Profile" primaryTypographyProps={{ fontSize: 14 }} />
-          </ListItemButton>
+          <Tooltip title={sidebarCollapsed ? 'Profile' : ''} placement="right" arrow>
+            <ListItemButton
+              onClick={() => handleNavClick('/profile')}
+              aria-label="Profile"
+              sx={{
+                mx: 1,
+                borderRadius: 2,
+                justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                px: sidebarCollapsed ? 1 : 2,
+                transition: 'padding 0.3s ease',
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: sidebarCollapsed ? 0 : 40, color: 'primary.main', justifyContent: 'center' }}>
+                <PersonIcon />
+              </ListItemIcon>
+              {!sidebarCollapsed && (
+                <ListItemText primary="Profile" primaryTypographyProps={{ fontSize: 14 }} />
+              )}
+            </ListItemButton>
+          </Tooltip>
         </ListItem>
+
+        {/* Logout */}
         <ListItem disablePadding>
-          <ListItemButton onClick={handleLogout} sx={{ mx: 1, borderRadius: 2, mb: 1 }}>
-            <ListItemIcon sx={{ minWidth: 40, color: 'error.main' }}><LogoutIcon /></ListItemIcon>
-            <ListItemText primary="Logout" primaryTypographyProps={{ fontSize: 14, color: 'error.main' }} />
-          </ListItemButton>
+          <Tooltip title={sidebarCollapsed ? 'Logout' : ''} placement="right" arrow>
+            <ListItemButton
+              onClick={handleLogout}
+              aria-label="Logout"
+              sx={{
+                mx: 1,
+                borderRadius: 2,
+                mb: 1,
+                justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                px: sidebarCollapsed ? 1 : 2,
+                transition: 'padding 0.3s ease',
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: sidebarCollapsed ? 0 : 40, color: 'error.main', justifyContent: 'center' }}>
+                <LogoutIcon />
+              </ListItemIcon>
+              {!sidebarCollapsed && (
+                <ListItemText primary="Logout" primaryTypographyProps={{ fontSize: 14, color: 'error.main' }} />
+              )}
+            </ListItemButton>
+          </Tooltip>
         </ListItem>
       </List>
     </Box>
@@ -136,14 +264,23 @@ export default function Sidebar({ drawerWidth }) {
 
   return (
     <>
-      {isMobile && (
-        <IconButton
-          onClick={() => setMobileOpen(true)}
-          sx={{ position: 'fixed', top: 8, left: 8, zIndex: 1300, bgcolor: 'primary.main', color: 'white' }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
+      {/* Mobile hamburger – always visible on small screens */}
+      <IconButton
+        onClick={() => setMobileOpen(true)}
+        aria-label="Open navigation menu"
+        sx={{
+          position: 'fixed',
+          top: 8,
+          left: 8,
+          zIndex: 1300,
+          bgcolor: 'primary.main',
+          color: 'white',
+          display: { xs: 'flex', sm: 'none' },
+          '&:hover': { bgcolor: 'primary.dark' },
+        }}
+      >
+        <MenuIcon />
+      </IconButton>
 
       {/* Mobile drawer */}
       <Drawer
@@ -151,17 +288,32 @@ export default function Sidebar({ drawerWidth }) {
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
         ModalProps={{ keepMounted: true }}
-        sx={{ display: { xs: 'block', sm: 'none' }, '& .MuiDrawer-paper': { width: drawerWidth } }}
+        sx={{
+          display: { xs: 'block', sm: 'none' },
+          '& .MuiDrawer-paper': {
+            width: EXPANDED_WIDTH,
+            boxSizing: 'border-box',
+          },
+        }}
       >
         {drawerContent}
       </Drawer>
 
-      {/* Desktop drawer */}
+      {/* Desktop drawer – collapsible */}
       <Drawer
         variant="permanent"
         sx={{
           display: { xs: 'none', sm: 'block' },
-          '& .MuiDrawer-paper': { width: drawerWidth, boxSizing: 'border-box', borderRight: '1px solid #E5E7EB' },
+          width: drawerWidth,
+          flexShrink: 0,
+          transition: 'width 0.3s ease',
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            borderRight: '1px solid #E5E7EB',
+            overflowX: 'hidden',
+            transition: 'width 0.3s ease',
+          },
         }}
         open
       >

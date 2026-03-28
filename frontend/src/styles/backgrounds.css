@@ -1,0 +1,50 @@
+/* ============================================================
+   Agricultural Theme – Beautiful Gradient Backgrounds
+   ============================================================ */
+
+/* Animated gradient background for the whole app */
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.app-background {
+  background: linear-gradient(-45deg, #ecfdf5, #d1fae5, #a7f3d0, #ecfdf5);
+  background-size: 400% 400%;
+  animation: gradientShift 18s ease infinite;
+  min-height: 100vh;
+}
+
+/* Subtle dot-pattern overlay */
+.app-background::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(16, 185, 129, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure page content sits above the pattern */
+.app-background > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Login / public pages – slightly richer gradient */
+.login-background {
+  background: linear-gradient(135deg, #065f46 0%, #10b981 45%, #34d399 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Page-level subtle background used inside the main content area */
+.page-background {
+  background: linear-gradient(160deg, #f0fdf4 0%, #ecfdf5 60%, #d1fae5 100%);
+  border-radius: 16px;
+  padding: 24px;
+}

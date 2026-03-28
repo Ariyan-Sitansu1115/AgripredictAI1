@@ -12,6 +12,11 @@ export function AuthProvider({ children }) {
     }
   });
 
+  // Sidebar collapsed state – persisted in localStorage
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    return localStorage.getItem('sidebarCollapsed') === 'true';
+  });
+
   const login = useCallback((newToken, userData) => {
     localStorage.setItem('token', newToken);
     if (userData) localStorage.setItem('user', JSON.stringify(userData));
@@ -31,8 +36,27 @@ export function AuthProvider({ children }) {
     setUser(userData);
   }, []);
 
+  const toggleSidebar = useCallback(() => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem('sidebarCollapsed', String(next));
+      return next;
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ token, user, isAuthenticated: !!token, login, logout, updateUser }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        user,
+        isAuthenticated: !!token,
+        login,
+        logout,
+        updateUser,
+        sidebarCollapsed,
+        toggleSidebar,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
