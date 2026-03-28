@@ -40,9 +40,3 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     </DashboardContext.Provider>
   );
 };
-
-export const useDashboardContext = () => {
-  const context = React.useContext(DashboardContext);
-  if (!context) throw new Error('useDashboardContext must be used within DashboardProvider');
-  return context;
-};

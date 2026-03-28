@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import DashboardHeader from './DashboardHeader';
 import MetricCard from '../Cards/MetricCard';
 import AlertCard from '../Cards/AlertCard';
@@ -232,9 +233,9 @@ const Dashboard: React.FC = () => {
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-base font-bold text-gray-900">Top Recommendations</h2>
-            <a href="/recommendations" className="text-xs text-primary-600 hover:text-primary-700 font-medium">
+            <Link to="/recommendations" className="text-xs text-primary-600 hover:text-primary-700 font-medium">
               View all →
-            </a>
+            </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {MOCK_RECOMMENDATIONS.map(rec => (
