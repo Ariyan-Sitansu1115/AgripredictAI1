@@ -1,6 +1,6 @@
 """Profit Pydantic schemas"""
 from pydantic import BaseModel
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 class ProfitCalculateRequest(BaseModel):
     crop: str
@@ -35,4 +35,4 @@ class CropProfitComparison(BaseModel):
 
 class ProfitComparisonResponse(BaseModel):
     season: str
-    crops: list
+    crops: List[CropProfitComparison]
