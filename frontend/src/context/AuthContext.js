@@ -12,14 +12,25 @@ export function AuthProvider({ children }) {
     }
   });
 
+  // Full farmer profile (includes district, local_area, notification prefs)
+  const [userProfile, setUserProfile] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('userProfile')) || null;
+    } catch {
+      return null;
+    }
+  });
+
   // Sidebar collapsed state – persisted in localStorage
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     return localStorage.getItem('sidebarCollapsed') === 'true';
   });
 
   const login = useCallback((newToken, userData) => {
-    localStorage.setItem('token', newToken);
-    if (userData) localStorage.setItem('user', JSON.stringify(userData));
+    try {
+      localStorage.setItem('token', newToken);
+      if (userData) localStorage.setItem('user', JSON.stringify(userData));
+    } catch { /* quota exceeded */ }
     setToken(newToken);
     setUser(userData);
   }, []);
@@ -27,13 +38,20 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('userProfile');
     setToken(null);
     setUser(null);
+    setUserProfile(null);
   }, []);
 
   const updateUser = useCallback((userData) => {
-    localStorage.setItem('user', JSON.stringify(userData));
+    try { localStorage.setItem('user', JSON.stringify(userData)); } catch { /* quota exceeded */ }
     setUser(userData);
+  }, []);
+
+  const saveUserProfile = useCallback((profileData) => {
+    try { localStorage.setItem('userProfile', JSON.stringify(profileData)); } catch { /* quota exceeded */ }
+    setUserProfile(profileData);
   }, []);
 
   const toggleSidebar = useCallback(() => {
@@ -49,10 +67,12 @@ export function AuthProvider({ children }) {
       value={{
         token,
         user,
+        userProfile,
         isAuthenticated: !!token,
         login,
         logout,
         updateUser,
+        saveUserProfile,
         sidebarCollapsed,
         toggleSidebar,
       }}
