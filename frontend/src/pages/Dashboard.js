@@ -9,6 +9,7 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import NatureIcon from '@mui/icons-material/Nature';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -23,10 +24,11 @@ const MOCK_PRICE_TRENDS = [
   { month: 'Jan', Rice: 2450, Wheat: 2400, Maize: 2050 },
 ];
 
-const MOCK_ALERTS = [
-  { id: 1, message: 'Tomato prices dropping by 15% this week', severity: 'HIGH', type: 'Price Drop' },
-  { id: 2, message: 'Wheat demand spike expected in Punjab markets', severity: 'MEDIUM', type: 'Demand Spike' },
-  { id: 3, message: 'Heavy rainfall forecast for Maharashtra', severity: 'HIGH', type: 'Weather' },
+// Generic alerts used when no location is set
+const GENERIC_ALERTS = [
+  { id: 1, message: 'Rice prices at local mandi dropped 12% this week', severity: 'HIGH', type: 'Price Drop' },
+  { id: 2, message: 'Heavy rainfall forecast for your district next 3 days', severity: 'HIGH', type: 'Weather' },
+  { id: 3, message: 'Wheat demand spike – good time to sell', severity: 'MEDIUM', type: 'Demand Spike' },
 ];
 
 const MOCK_RECOMMENDATIONS = [
@@ -60,10 +62,23 @@ function StatCard({ title, value, icon, color, subtitle }) {
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState(null);
+
+  const locationLabel = userProfile?.local_area
+    ? `${userProfile.local_area}, ${userProfile.district}, ${userProfile.location}`
+    : userProfile?.district
+    ? `${userProfile.district}, ${userProfile.location}`
+    : userProfile?.location || null;
+
+  // Build location-aware alerts preview
+  const recentAlerts = locationLabel ? [
+    { id: 1, message: `Rice prices dropped 12% at ${userProfile.district || userProfile.location} mandi`, severity: 'HIGH', type: 'Price Drop' },
+    { id: 2, message: `Heavy rainfall expected in ${userProfile.district || userProfile.location} next 3 days`, severity: 'HIGH', type: 'Weather' },
+    { id: 3, message: 'Wheat demand spike – good time to sell at local mandi', severity: 'MEDIUM', type: 'Demand Spike' },
+  ] : GENERIC_ALERTS;
 
   useEffect(() => {
     dashboardService.getSummary()
@@ -86,9 +101,20 @@ export default function Dashboard() {
         <Typography variant="h4" fontWeight={700} color="primary.main">
           Welcome back, {user?.name || 'Farmer'} 👋
         </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Here's your farm intelligence overview for today
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mt: 0.5 }}>
+          <Typography variant="body1" color="text.secondary">
+            Here's your farm intelligence overview for today
+          </Typography>
+          {locationLabel && (
+            <Chip
+              icon={<LocationOnIcon />}
+              label={locationLabel}
+              size="small"
+              color="success"
+              variant="outlined"
+            />
+          )}
+        </Box>
       </Box>
 
       {loading && <LinearProgress sx={{ mb: 2 }} />}
@@ -167,8 +193,11 @@ export default function Dashboard() {
                 <Typography variant="h6" fontWeight={600}>Recent Alerts</Typography>
                 <Button size="small" onClick={() => navigate('/alerts')}>View All</Button>
               </Box>
+              {locationLabel && (
+                <Chip icon={<LocationOnIcon />} label={`Showing alerts for ${userProfile.district || userProfile.location}`} size="small" color="success" variant="outlined" sx={{ mb: 1.5 }} />
+              )}
               <List disablePadding>
-                {MOCK_ALERTS.map((a) => (
+                {recentAlerts.map((a) => (
                   <ListItem key={a.id} disablePadding sx={{ py: 0.5 }}>
                     <ListItemIcon sx={{ minWidth: 36 }}>
                       <NotificationsIcon color={SEVERITY_COLOR[a.severity]} fontSize="small" />

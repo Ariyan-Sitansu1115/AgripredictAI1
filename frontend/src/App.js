@@ -18,12 +18,12 @@ import DataSources from './pages/DataSources';
 
 const theme = createTheme({
   palette: {
-    primary: { main: '#10B981' },
+    primary: { main: '#10B981', dark: '#047857', light: '#6EE7B7' },
     secondary: { main: '#92400e' },
     warning: { main: '#F59E0B' },
     error: { main: '#EF4444' },
     info: { main: '#3B82F6' },
-    background: { default: '#f0fdf4' },
+    background: { default: 'transparent' },
   },
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -38,15 +38,15 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 16,
-          background: 'rgba(255, 255, 255, 0.92)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255, 255, 255, 0.4)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+          background: 'rgba(255, 255, 255, 0.93)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255, 255, 255, 0.5)',
+          boxShadow: '0 8px 32px rgba(6, 78, 59, 0.12)',
           transition: 'all 0.3s ease',
           '&:hover': {
             background: 'rgba(255, 255, 255, 0.98)',
-            boxShadow: '0 12px 40px rgba(0, 0, 0, 0.14)',
+            boxShadow: '0 16px 48px rgba(6, 78, 59, 0.18)',
             transform: 'translateY(-4px)',
           },
         },
