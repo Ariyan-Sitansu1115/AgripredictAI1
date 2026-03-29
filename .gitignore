@@ -214,3 +214,9 @@ frontend/build/
 
 # Application log files
 logs/*.log
+# Log files (keep directory placeholder)
+logs/*.log
+# SQLite databases
+*.db
+*.sqlite3
+

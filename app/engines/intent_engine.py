@@ -7,6 +7,8 @@ Extracts:
   * crops        (list of canonical crop names)
   * state        (canonical Indian state name, optional)
   * season       (kharif / rabi / zaid, optional)
+
+Logging is written to ``logs/intent_engine.log`` via the centralized logger.
 """
 import re
 from typing import Dict, List, Optional, Any
@@ -14,6 +16,7 @@ from datetime import date
 
 from app.core.constants import SUPPORTED_CROPS
 from app.core.logger import intent_logger as logger
+from app.core.logger import intent_logger as logger  # file-backed structured logger
 from app.utils.constants import (
     CROP_ALIASES,
     STATE_ALIASES,
@@ -130,6 +133,7 @@ def parse_intent(text: str) -> Dict[str, Any]:
     }
 
     if not text or not text.strip():
+        logger.warning("parse_intent called with empty text – returning 'general'")
         return result
 
     # Determine intent type (order matters – most specific first)
@@ -154,6 +158,7 @@ def parse_intent(text: str) -> Dict[str, Any]:
 
     logger.info(
         "Parsed intent: type=%s crops=%s state=%s season=%s | text='%s'",
+        "Parsed intent: type=%s | crops=%s | state=%s | season=%s | text='%s'",
         result["intent_type"],
         result["crops"],
         result["state"],

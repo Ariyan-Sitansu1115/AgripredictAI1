@@ -9,6 +9,7 @@ from app.api import (
     recommendation_api, simulation_api, alert_api, dashboard_api,
     chatbot_api, voice_api, debug_api,
 )
+from app.api.debug_api import router as debug_router
 from app.core.config import settings
 from app.db import engine
 from app.models import Base
@@ -49,6 +50,7 @@ app.include_router(dashboard_api.router, prefix="/api/dashboard", tags=["Dashboa
 app.include_router(chatbot_api.router, prefix="/api/chat", tags=["Chatbot"])
 app.include_router(voice_api.router, prefix="/api/chat", tags=["Voice"])
 app.include_router(debug_api.router, tags=["Debug"])
+app.include_router(debug_router, tags=["Debug"])
 
 @app.get("/health")
 async def health_check():
