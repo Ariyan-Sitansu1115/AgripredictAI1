@@ -29,7 +29,7 @@ _GTTS_LANG_MAP = {
 
 def _audio_cache_path(text: str, language: str) -> str:
     """Return a deterministic file path for the given text+language combo."""
-    key = hashlib.md5(f"{language}:{text}".encode()).hexdigest()
+    key = hashlib.sha256(f"{language}:{text}".encode()).hexdigest()
     return os.path.join(_AUDIO_DIR, f"tts_{key}.mp3")
 
 

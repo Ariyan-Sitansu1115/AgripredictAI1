@@ -56,7 +56,7 @@
 - gTTS==2.5.1
 - SpeechRecognition==3.10.0
 - langdetect==1.0.9
-- openai>=1.0.0
+- openai>=1.0.0,<2.0.0
 
 
 

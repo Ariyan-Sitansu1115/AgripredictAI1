@@ -23,7 +23,7 @@ INDIAN_STATES = [
 # State aliases / common spellings → canonical name
 STATE_ALIASES: dict = {
     "orissa": "Odisha",
-    "odiша": "Odisha",
+    "odisa": "Odisha",
     "up": "Uttar Pradesh",
     "mp": "Madhya Pradesh",
     "ap": "Andhra Pradesh",
