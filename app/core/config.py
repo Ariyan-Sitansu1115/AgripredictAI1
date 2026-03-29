@@ -33,6 +33,22 @@ class Settings(BaseSettings):
     WEATHER_API_KEY: str = ""
     MARKET_DATA_API_KEY: str = ""
 
+    # Email (Gmail SMTP)
+    GMAIL_EMAIL: str = ""
+    GMAIL_APP_PASSWORD: str = ""
+
+    # SMS – Twilio
+    TWILIO_ACCOUNT_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_PHONE_NUMBER: str = ""
+
+    # SMS – Fast2SMS (India)
+    FAST2SMS_API_KEY: str = ""
+    FAST2SMS_ROUTE: str = "q"
+
+    # Choose SMS provider: "twilio" | "fast2sms"
+    SMS_PROVIDER: str = "twilio"
+
     # Chatbot / Voice / Translation Settings
     OPENAI_API_KEY: str = ""
     GOOGLE_TRANSLATE_API_KEY: str = ""
