@@ -4,11 +4,10 @@ Uses googletrans (free, no API key) with an in-memory cache.
 Gracefully falls back to the original text when the library is unavailable
 or the translation fails.
 """
-import logging
 from functools import lru_cache
 from typing import Optional
 
-logger = logging.getLogger(__name__)
+from app.core.logger import translator_logger as logger
 
 # Language-code mapping for googletrans
 _LANG_MAP = {
@@ -59,7 +58,12 @@ def translate_text(text: str, src: str, dest: str) -> str:
 
     try:
         result = translator.translate(text, src=gt_src, dest=gt_dest)
-        return result.text if result and result.text else text
+        translated = result.text if result and result.text else text
+        logger.debug(
+            "Translated (%s→%s): '%s' → '%s'",
+            src, dest, text[:60], translated[:60],
+        )
+        return translated
     except Exception as exc:
-        logger.warning("Translation failed (%s→%s): %s", src, dest, exc)
+        logger.warning("Translation failed (%s→%s): %s | input='%s'", src, dest, exc, text[:60])
         return text

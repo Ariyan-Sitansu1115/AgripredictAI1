@@ -9,11 +9,11 @@ Extracts:
   * season       (kharif / rabi / zaid, optional)
 """
 import re
-import logging
 from typing import Dict, List, Optional, Any
 from datetime import date
 
 from app.core.constants import SUPPORTED_CROPS
+from app.core.logger import intent_logger as logger
 from app.utils.constants import (
     CROP_ALIASES,
     STATE_ALIASES,
@@ -22,8 +22,6 @@ from app.utils.constants import (
     RABI_MONTHS,
     ZAID_MONTHS,
 )
-
-logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Pre-compiled patterns
@@ -154,5 +152,12 @@ def parse_intent(text: str) -> Dict[str, Any]:
     result["state"] = _extract_state(text)
     result["season"] = _detect_season(text)
 
-    logger.debug("Parsed intent: %s", result)
+    logger.info(
+        "Parsed intent: type=%s crops=%s state=%s season=%s | text='%s'",
+        result["intent_type"],
+        result["crops"],
+        result["state"],
+        result["season"],
+        text[:80],
+    )
     return result
