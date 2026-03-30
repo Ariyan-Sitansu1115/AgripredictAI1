@@ -25,6 +25,7 @@ class ErrorCode(Enum):
     TRANSLATION_FAILED         = "TR_001"
     INTENT_EXTRACTION_FAILED   = "IE_001"
     API_CALL_FAILED            = "API_001"
+    OPENAI_CALL_FAILED         = "OAPI_001"
     RESPONSE_GENERATION_FAILED = "RG_001"
     VOICE_PROCESSING_FAILED    = "VP_001"
     UNKNOWN_ERROR              = "UNK_001"
