@@ -1,6 +1,6 @@
 """
-Chatbot Service – core logic that ties together intent parsing,
-prediction, risk analysis, comparison, translation, and TTS.
+Chatbot Service – core logic that ties together OpenAI GPT, prediction data,
+translation, and TTS.
 
 Each processing step is wrapped in a try/except block and logged with
 a short ``request_id`` so failures can be traced end-to-end.
@@ -13,9 +13,9 @@ from typing import Optional, List, Dict, Any
 
 from app.core.constants import SUPPORTED_CROPS
 from app.core.logger import chatbot_logger as logger
-from app.engines import intent_engine, comparison_engine, risk_analyzer
-from app.services import conversation_memory
-from app.utils import language_detector, translator, text_to_speech, prompt_templates
+from app.engines import comparison_engine, risk_analyzer
+from app.services import conversation_memory, openai_service
+from app.utils import language_detector, translator, text_to_speech
 from app.utils.constants import SUPPORTED_LANGUAGES
 from app.utils.error_handler import ChatbotException, ErrorCode
 
@@ -88,8 +88,6 @@ def process_message(
 
     Each pipeline step is logged with a unique request_id so failures can be
     traced end-to-end in the log files.
-    Every step is individually logged under a short *request_id* so that
-    failures can be traced in ``logs/chatbot.log``.
 
     Returns:
         {
@@ -154,11 +152,11 @@ def process_message(
             en_message_enriched = en_message
 
         # ------------------------------------------------------------------
-        # Step 4 – Intent extraction
+        # Step 4 – Intent extraction via OpenAI
         # ------------------------------------------------------------------
-        logger.info("[%s] STEP 3: Intent extraction", request_id)
+        logger.info("[%s] STEP 3: Intent extraction (OpenAI)", request_id)
         try:
-            intent = intent_engine.parse_intent(en_message_enriched)
+            intent = openai_service.extract_intent(en_message_enriched)
             intent_type = intent["intent_type"]
             crops: List[str] = intent["crops"]
             state: Optional[str] = intent["state"] or ctx.get("last_state")
@@ -178,22 +176,18 @@ def process_message(
         month = date.today().month
 
         # ------------------------------------------------------------------
-        # Step 5 – Build response
+        # Step 5 – Build structured data from data engines
         # ------------------------------------------------------------------
-        logger.info("[%s] STEP 4: Response generation (intent=%s)", request_id, intent_type)
+        logger.info("[%s] STEP 4: Structured data generation (intent=%s)", request_id, intent_type)
+        structured_data: Optional[Dict[str, Any]] = None
+        comparison_list: Optional[List[Dict[str, Any]]] = None
+        data_context: Optional[str] = None
+
         try:
-            reply_en = ""
-            structured_data: Optional[Dict[str, Any]] = None
-            comparison_list: Optional[List[Dict[str, Any]]] = None
-
-            if intent_type == "greeting":
-                reply_en = prompt_templates.greeting_template()
-
-            elif intent_type == "comparison" or (intent_type == "what_if" and len(crops) >= 2):
+            if intent_type == "comparison" or (intent_type == "what_if" and len(crops) >= 2):
                 if len(crops) < 2:
                     crops = list(SUPPORTED_CROPS[:2])
                 ranked = comparison_engine.compare_crops(crops, state, month)
-                reply_en = prompt_templates.comparison_template(ranked, state)
                 comparison_list = ranked
                 if ranked:
                     best = ranked[0]
@@ -206,6 +200,14 @@ def process_message(
                         "profitability": best["profitability"],
                         "intent_type": intent_type,
                     }
+                    lines = [f"Crop comparison data ({state or 'all regions'}):"]
+                    for c in ranked:
+                        lines.append(
+                            f"  {c['crop']}: price=₹{c['predicted_price']:.0f}/qtl "
+                            f"demand={c['demand_level']} risk={c['risk_level']} "
+                            f"profitability={c['profitability']:.0f}%"
+                        )
+                    data_context = "\n".join(lines)
 
             elif intent_type in ("price_query", "what_if", "risk_query", "profitability"):
                 if not crops:
@@ -217,15 +219,6 @@ def process_message(
                 next_month_idx = month % 12
                 trend = "UP" if trend_mult[next_month_idx] > trend_mult[month - 1] else (
                     "DOWN" if trend_mult[next_month_idx] < trend_mult[month - 1] else "STABLE"
-                )
-                reply_en = prompt_templates.single_crop_template(
-                    crop=crop,
-                    state=state,
-                    price=price,
-                    demand=analysis["demand_level"],
-                    risk=analysis["risk_level"],
-                    profitability=analysis["profitability"],
-                    trend=trend,
                 )
                 structured_data = {
                     "crop": crop,
@@ -239,15 +232,18 @@ def process_message(
                     "explanation": analysis["explanation"],
                     "intent_type": intent_type,
                 }
+                data_context = (
+                    f"{crop}{f' in {state}' if state else ''} data: "
+                    f"price=₹{price:.0f}/qtl demand={analysis['demand_level']} "
+                    f"risk={analysis['risk_level']} profitability={analysis['profitability']:.0f}% "
+                    f"trend={trend}"
+                )
 
             elif intent_type == "recommendation":
                 target_crops = crops if crops else list(SUPPORTED_CROPS)
                 best_crop = comparison_engine.recommend_best_crop(target_crops, state, month)
                 if not best_crop:
                     best_crop = SUPPORTED_CROPS[0]
-                reply_en = prompt_templates.recommendation_template(
-                    best_crop, state, season or "current"
-                )
                 analysis = risk_analyzer.analyse(best_crop, state or "", month)
                 structured_data = {
                     "crop": best_crop,
@@ -257,25 +253,49 @@ def process_message(
                     "profitability": analysis["profitability"],
                     "intent_type": intent_type,
                 }
+                data_context = (
+                    f"Recommended crop{f' for {state}' if state else ''}: {best_crop} "
+                    f"(season: {season or 'current'}) "
+                    f"demand={analysis['demand_level']} risk={analysis['risk_level']} "
+                    f"profitability={analysis['profitability']:.0f}%"
+                )
 
-            else:
-                reply_en = prompt_templates.fallback_template()
-
-            logger.info("[%s] ✓ Response generated (%d chars)", request_id, len(reply_en))
         except ChatbotException:
             raise
         except Exception as exc:
+            logger.warning("[%s] Structured data generation failed: %s", request_id, exc)
+            # Non-fatal – OpenAI will still give a helpful response
+
+        # ------------------------------------------------------------------
+        # Step 6 – Generate reply via OpenAI
+        # ------------------------------------------------------------------
+        logger.info("[%s] STEP 5: Response generation (OpenAI)", request_id)
+        try:
+            history = conversation_memory.get_history(session_id)
+            openai_history = [
+                {"role": t["role"], "content": t["content"]}
+                for t in history
+                if t.get("role") in ("user", "assistant") and t.get("content")
+            ]
+            reply_en = openai_service.generate_response(
+                user_message=en_message_enriched,
+                history=openai_history,
+                data_context=data_context,
+            )
+            if not reply_en:
+                reply_en = "I'm sorry, I couldn't generate a response. Please try again."
+            logger.info("[%s] ✓ Response generated (%d chars)", request_id, len(reply_en))
+        except Exception as exc:
             raise ChatbotException(
-                ErrorCode.RESPONSE_GENERATION_FAILED,
-                f"Failed to generate response: {exc}",
+                ErrorCode.OPENAI_CALL_FAILED,
+                f"OpenAI response generation failed: {exc}",
                 {"intent_type": intent_type, "crops": crops},
                 request_id=request_id,
             ) from exc
-
         # ------------------------------------------------------------------
-        # Step 6 – Translate response back to user language
+        # Step 7 – Translate response back to user language
         # ------------------------------------------------------------------
-        logger.info("[%s] STEP 5: Translating response back to %s", request_id, detected_language)
+        logger.info("[%s] STEP 6: Translating response back to %s", request_id, detected_language)
         if detected_language != "en" and reply_en:
             try:
                 reply_final = translator.translate_text(reply_en, src="en", dest=detected_language)
@@ -290,9 +310,9 @@ def process_message(
             reply_final = reply_en
 
         # ------------------------------------------------------------------
-        # Step 7 – Generate TTS audio (best-effort)
+        # Step 8 – Generate TTS audio (best-effort)
         # ------------------------------------------------------------------
-        logger.info("[%s] STEP 6: Generating audio", request_id)
+        logger.info("[%s] STEP 7: Generating audio", request_id)
         audio_url: Optional[str] = None
         try:
             audio_path = text_to_speech.synthesize_speech(reply_final, detected_language)
@@ -306,7 +326,7 @@ def process_message(
             logger.warning("[%s] TTS generation failed: %s", request_id, exc)
 
         # ------------------------------------------------------------------
-        # Step 8 – Build suggestions & persist memory
+        # Step 9 – Build suggestions & persist memory
         # ------------------------------------------------------------------
         suggestions = _make_suggestions(intent_type, crops, state)
 
@@ -331,8 +351,16 @@ def process_message(
             "[%s] ✗ ChatbotException %s: %s",
             request_id, exc.error_code.value, exc.message,
         )
+        if exc.error_code == ErrorCode.OPENAI_CALL_FAILED:
+            user_msg = (
+                "I'm having trouble connecting to the AI service right now. "
+                "Please check your internet connection and try again, "
+                "or contact support if the problem persists."
+            )
+        else:
+            user_msg = "Sorry, I encountered an error. Please try again."
         return {
-            "reply_text": "Sorry, I encountered an error. Please try again.",
+            "reply_text": user_msg,
             "reply_audio_url": None,
             "structured_data": None,
             "comparison": None,
