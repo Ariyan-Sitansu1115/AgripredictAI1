@@ -10,7 +10,9 @@ import tempfile
 import uuid
 from typing import List
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 from fastapi.responses import FileResponse
 
 from app.core.logger import api_logger as logger
@@ -66,64 +68,106 @@ def _build_response(raw: dict, session_id: str) -> ChatResponse:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.post("/", response_model=ChatResponse, summary="Send a chat message")
-def chat(payload: ChatRequest) -> ChatResponse:
+async def _chat_impl(request: Request) -> JSONResponse:
     """
     Process a text message from a farmer and return an AI-generated response.
 
     On unexpected errors the response includes an ``error_code`` and
     ``request_id`` so callers can correlate failures with server logs.
     """
-    session_id = payload.session_id or str(uuid.uuid4())
+    try:
+        data = await request.json()
+    except Exception as exc:
+        logger.exception("Invalid JSON body for /api/chat: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"reply": "Invalid JSON request body.", "reply_text": "Invalid JSON request body."},
+        )
+
+    if not isinstance(data, dict):
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"reply": "Invalid request body.", "reply_text": "Invalid request body."},
+        )
+
+    message = data.get("message")
+    if not isinstance(message, str) or not message.strip():
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "reply": "Invalid input: 'message' is required.",
+                "reply_text": "Invalid input: 'message' is required.",
+            },
+        )
+
+    language = data.get("language")
+    if not isinstance(language, str) or not language.strip():
+        language = "en"
+
+    session_raw = data.get("session_id")
+    session_id = session_raw.strip() if isinstance(session_raw, str) and session_raw.strip() else str(uuid.uuid4())
 
     logger.info(
         "Chat request | session=%s lang=%s msg_len=%d",
-        session_id, payload.language, len(payload.message),
+        session_id, language, len(message.strip()),
     )
-    logger.debug("Chat request body | session=%s msg='%.200s'", session_id, payload.message)
+    logger.debug("Chat request body | session=%s msg='%.200s'", session_id, message)
 
     try:
         raw = chatbot_service.process_message(
-            message=payload.message,
-            language=payload.language,
+            message=message.strip(),
+            language=language,
             session_id=session_id,
         )
+
+        if not isinstance(raw, dict):
+            raw = {"reply_text": "Sorry, I could not generate a response right now."}
+
+        normalized = _build_response(raw, session_id)
+        payload = jsonable_encoder(normalized)
+        reply_text = payload.get("reply_text") or ""
+        payload["reply"] = str(reply_text)
+        return JSONResponse(status_code=status.HTTP_200_OK, content=payload)
     except ChatbotException as exc:
-        logger.error(
+        error_code = getattr(exc.error_code, "value", str(exc.error_code or "CHAT_001"))
+        logger.exception(
             "ChatbotException [%s] %s: %s | details=%s",
-            exc.request_id, exc.error_code.value, exc.message, exc.details,
+            exc.request_id, error_code, exc.message, exc.details,
         )
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={
+        error_reply = "Sorry, I encountered an error processing your request. Please try again."
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "reply": error_reply,
+                "reply_text": error_reply,
                 "error": exc.message,
-                "error_code": exc.error_code.value,
-                "details": exc.details,
-                "request_id": exc.request_id or session_id,
+                "error_code": error_code,
             },
         )
     except Exception as exc:
         logger.exception("Unexpected chatbot processing error: %s", exc)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={
-                "error": "I encountered an error processing your request. Please try again.",
+        error_reply = "Sorry, I encountered an unexpected error. Please try again."
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "reply": error_reply,
+                "reply_text": error_reply,
+                "error": "An unexpected error occurred.",
                 "error_code": "UNK_001",
             },
         )
 
-    if raw.get("error_code"):
-        logger.warning(
-            "Chat request completed with error | session=%s error_code=%s request_id=%s",
-            session_id, raw.get("error_code"), raw.get("request_id"),
-        )
-    else:
-        logger.info(
-            "Chat request completed | session=%s request_id=%s",
-            session_id, raw.get("request_id"),
-        )
 
-    return _build_response(raw, session_id)
+@router.post("", summary="Send a chat message")
+async def chat_no_trailing_slash(request: Request) -> JSONResponse:
+    """Handle /api/chat without redirect."""
+    return await _chat_impl(request)
+
+
+@router.post("/", summary="Send a chat message", include_in_schema=False)
+async def chat_with_trailing_slash(request: Request) -> JSONResponse:
+    """Handle /api/chat/ for compatibility with existing clients."""
+    return await _chat_impl(request)
 
 
 @router.get("/history/{session_id}", response_model=ConversationHistoryResponse)

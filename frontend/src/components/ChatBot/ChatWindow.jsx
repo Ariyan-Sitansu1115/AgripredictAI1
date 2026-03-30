@@ -53,8 +53,8 @@ function StructuredCard({ data }) {
       label: t('chat.structuredData.price'),
       value: `₹${Math.round(data.predicted_price)}/qtl`,
     },
-    data.demand_level && { label: t('chat.structuredData.demand'), value: <RiskBadge level={data.demand_level} /> },
-    data.risk_level   && { label: t('chat.structuredData.risk'),   value: <RiskBadge level={data.risk_level} /> },
+    data.demand_level && { label: t('chat.structuredData.demand'), value: <RiskBadge level={String(data.demand_level)} /> },
+    data.risk_level   && { label: t('chat.structuredData.risk'),   value: <RiskBadge level={String(data.risk_level)} /> },
     data.profitability != null && {
       label: t('chat.structuredData.profitability'),
       value: (
@@ -69,7 +69,7 @@ function StructuredCard({ data }) {
         </span>
       ),
     },
-    data.trend && { label: t('chat.structuredData.trend'), value: data.trend },
+    data.trend && { label: t('chat.structuredData.trend'), value: String(data.trend) },
   ].filter(Boolean);
 
   return (
@@ -86,17 +86,19 @@ function StructuredCard({ data }) {
 
 function MessageBubble({ msg }) {
   const isUser = msg.role === 'user';
+  // Ensure content is always a string
+  const content = typeof msg.content === 'string' ? msg.content : String(msg.content || '');
   return (
     <Box className={`${styles.messageBubble} ${isUser ? styles.user : styles.assistant}`}>
       <Box className={styles.bubbleContent}>
-        {msg.content}
+        {content}
         {!isUser && msg.structured_data && <StructuredCard data={msg.structured_data} />}
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
         {msg.timestamp && (
           <span className={styles.messageTime}>{formatTime(msg.timestamp)}</span>
         )}
-        {!isUser && msg.content && <VoiceOutput text={msg.content} language={msg.language || 'en'} />}
+        {!isUser && content && <VoiceOutput text={content} language={msg.language || 'en'} />}
       </Box>
     </Box>
   );
@@ -190,21 +192,58 @@ export default function ChatWindow() {
 
         const botMsg = {
           role: 'assistant',
-          content: data.reply_text,
+          content: String(data.reply_text || 'No response from AI'),
           timestamp: new Date().toISOString(),
           structured_data: data.structured_data,
           comparison: data.comparison,
           language: data.detected_language || language,
         };
         setMessages((prev) => [...prev, botMsg]);
-        if (data.suggestions?.length) setSuggestions(data.suggestions);
+        // Ensure suggestions is always an array of strings
+        const safeSuggestions = Array.isArray(data.suggestions) 
+          ? data.suggestions.filter(s => typeof s === 'string')
+          : [];
+        if (safeSuggestions.length > 0) setSuggestions(safeSuggestions);
       } catch (err) {
         const errDetail = err?.response?.data?.detail;
-        const errMsg =
-          (typeof errDetail === 'object' ? errDetail?.error : errDetail) ||
-          err?.message ||
-          'Sorry, I encountered an error. Please try again.';
-        if (isDev) console.error('❌ Chatbot Error:', { status: err?.response?.status, detail: errDetail });
+        let errMsg = 'Sorry, I encountered an error. Please try again.';
+        
+        if (isDev) console.error('❌ Chatbot Error - Full Detail:', { status: err?.response?.status, detail: errDetail, err: err?.message });
+        
+        // Handle Pydantic validation errors (array of error objects)
+        if (Array.isArray(errDetail)) {
+          const messages = errDetail
+            .map(e => {
+              if (typeof e === 'object' && e?.msg) {
+                return String(e.msg);
+              } else if (typeof e === 'string') {
+                return e;
+              }
+              return null;
+            })
+            .filter(Boolean);
+          if (messages.length > 0) {
+            errMsg = messages.join('; ');
+          }
+        }
+        // Handle error object with error property
+        else if (typeof errDetail === 'object' && errDetail?.error) {
+          errMsg = String(errDetail.error);
+        }
+        // Handle string detail
+        else if (typeof errDetail === 'string') {
+          errMsg = errDetail;
+        }
+        // Handle axios error message
+        else if (typeof err?.message === 'string') {
+          errMsg = err.message;
+        }
+
+        if (!err?.response) {
+          errMsg = 'Unable to reach the server right now. Please check backend connectivity and try again.';
+        }
+        
+        if (isDev) console.error('❌ Final Error Message:', errMsg);
         setMessages((prev) => [
           ...prev,
           {

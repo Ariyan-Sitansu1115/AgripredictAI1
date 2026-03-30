@@ -19,7 +19,7 @@ function resolve(obj, key) {
 /**
  * Get the translation for a given dot-separated key.
  * Falls back to English if the key is missing in the current language.
- * Logs a warning and returns the key itself as last resort.
+ * Always returns a string (converts objects to string if needed).
  */
 export function t(key) {
   const lang = getLanguage();
@@ -28,7 +28,17 @@ export function t(key) {
     addMissingKey(key);
     return key;
   }
-  return value;
+  // Ensure we always return a string, never an object
+  if (typeof value === 'string') {
+    return value;
+  }
+  // If somehow an object or array slipped through, convert it to string
+  if (typeof value === 'object') {
+    console.warn(`[i18n] Translation key "${key}" returned an object instead of string:`, value);
+    return JSON.stringify(value);
+  }
+  // For numbers, booleans, etc., convert to string
+  return String(value);
 }
 
 /**

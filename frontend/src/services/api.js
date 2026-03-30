@@ -1,6 +1,21 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const resolveApiUrl = () => {
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+
+  if (typeof window === 'undefined') {
+    return 'http://localhost:8000';
+  }
+
+  const { protocol, hostname } = window.location;
+
+  // Default to same host on backend port so LAN/static/dev setups all work.
+  return `${protocol}//${hostname}:8000`;
+};
+
+const API_URL = resolveApiUrl();
 
 const api = axios.create({
   baseURL: API_URL,
@@ -148,8 +163,40 @@ export const dashboardService = {
 };
 
 // Chatbot
+const buildChatPayload = (data = {}) => {
+  const message = typeof data.message === 'string' ? data.message.trim() : '';
+  return {
+    ...data,
+    message,
+  };
+};
+
+const postChatWithFallback = async (data) => {
+  const payload = buildChatPayload(data);
+  const token = localStorage.getItem('token');
+
+  // Primary path matches backend include_router(prefix="/api/chat") + @router.post("/")
+  try {
+    return await api.post('/api/chat', payload);
+  } catch (error) {
+    const isNetworkError = !error.response;
+    if (!isNetworkError) {
+      throw error;
+    }
+
+    // Fallback: same-origin relative call (uses CRA proxy in dev/reverse proxy in prod)
+    return axios.post('/api/chat', payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      timeout: 60000,
+    });
+  }
+};
+
 export const chatbotService = {
-  chat: (data) => retryRequest(() => api.post('/api/chat/', data)),
+  chat: (data) => retryRequest(() => postChatWithFallback(data)),
   getHistory: (sessionId) => api.get(`/api/chat/history/${sessionId}`),
   clearHistory: (sessionId) => api.delete(`/api/chat/history/${sessionId}`),
   voiceChat: (formData) => api.post('/api/chat/voice', formData, {
