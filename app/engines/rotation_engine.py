@@ -143,6 +143,7 @@ CROP_DB: Dict[str, Dict] = {
 }
 
 # Legumes (nitrogen-fixing cover crops) that can be inserted as bonus entries
+# Legumes (nitrogen-fixing cover crops) that can be inserted as bonus entries
 LEGUME_CROPS = {
     "Soybean": {
         "nitrogen_impact": 30,
@@ -183,6 +184,20 @@ LEGUME_CROPS = {
 }
 
 ALL_CROPS: Dict[str, Dict] = {**CROP_DB, **LEGUME_CROPS}
+"""Combined crop database including both standard crops and nitrogen-fixing legumes.
+
+Keys are crop names (str). Values are dicts with the following fields:
+  - nitrogen_impact (float): Nitrogen change in kg/ha per season (positive = adds, negative = removes)
+  - phosphorus_impact (float): Phosphorus change in kg/ha per season
+  - potassium_impact (float): Potassium change in kg/ha per season
+  - organic_matter_impact (float): Organic matter change (%) per season
+  - pest_family (str): Pest/disease family used to enforce rotation diversity
+  - base_profit_inr_ha (int): Estimated baseline profit in INR per hectare
+  - typical_yield_kg_ha (int): Representative yield in kg per hectare
+  - season (str): Primary growing season ('Kharif' or 'Rabi')
+  - soil_types (list[str]): Compatible soil types
+  - nitrogen_fix (bool): True if the crop fixes atmospheric nitrogen
+"""
 
 # Nutrient ideal ranges (kg/ha) and organic matter (%)
 NUTRIENT_IDEAL = {
@@ -397,7 +412,6 @@ def build_rotation_plan(
         plan_years=plan_years,
         prioritize_profit=prioritize_profit,
         current_crop=current_crop,
-        seed=42,
     )
 
     rotation_plan = []
@@ -575,7 +589,6 @@ def optimize_rotation(
         initial_nutrients=initial_nutrients,
         plan_years=len(existing_plan),
         prioritize_profit=True,
-        seed=99,
     )
 
     # Apply custom prices if provided
