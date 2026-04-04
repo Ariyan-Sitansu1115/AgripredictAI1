@@ -23,7 +23,8 @@
       "recommendations": "ସ୍ମାର୍ଟ ପରାମର୍ଶ",
       "simulator": "ସିମୁଲେଟର",
       "alerts": "ସତର୍କତା",
-      "dataSources": "ତଥ୍ୟ ଉତ୍ସ"
+      "dataSources": "ତଥ୍ୟ ଉତ୍ସ",
+      "cropRotation": "ଫସଲ ଚକ୍ର"
     }
   },
   "dashboard": {

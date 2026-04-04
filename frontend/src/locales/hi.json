@@ -23,7 +23,8 @@
       "recommendations": "स्मार्ट सुझाव",
       "simulator": "सिम्युलेटर",
       "alerts": "अलर्ट",
-      "dataSources": "डेटा स्रोत"
+      "dataSources": "डेटा स्रोत",
+      "cropRotation": "फसल चक्र"
     }
   },
   "dashboard": {
