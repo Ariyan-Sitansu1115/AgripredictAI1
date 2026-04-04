@@ -6,7 +6,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import SpaIcon from '@mui/icons-material/Spa';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import BugReportIcon from '@mui/icons-material/BugReport';
-import EcoIcon from '@mui/icons-material/Nature';
+import NatureIcon from '@mui/icons-material/Nature';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const DEFAULT_SUMMARY = {
@@ -55,7 +55,7 @@ export default function RotationSummary({ plan, soilData }) {
       value: `${summary.sustainabilityScore}/100`,
       pct: summary.sustainabilityScore,
       color: '#8B5CF6',
-      icon: <EcoIcon />,
+      icon: <NatureIcon />,
     },
     {
       label: 'Pest Reduction',

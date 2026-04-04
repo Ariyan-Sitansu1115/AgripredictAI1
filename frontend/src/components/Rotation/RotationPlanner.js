@@ -376,7 +376,7 @@ export default function RotationPlanner({ onPlanGenerated }) {
                   Optimizing rotation plan…
                 </Typography>
                 <Typography variant="body2" color="text.secondary" mt={1}>
-                  AI is analysing soil health, market prices, and pest cycles
+                  AI is analyzing soil health, market prices, and pest cycles
                 </Typography>
               </CardContent>
             </Card>
