@@ -23,7 +23,8 @@
       "recommendations": "Smart Recommendations",
       "simulator": "Simulator",
       "alerts": "Alerts",
-      "dataSources": "Data Sources"
+      "dataSources": "Data Sources",
+      "cropRotation": "Crop Rotation"
     }
   },
   "dashboard": {

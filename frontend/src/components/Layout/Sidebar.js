@@ -18,6 +18,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import AgricultureIcon from '@mui/icons-material/Agriculture';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { t } from '../../utils/i18n';
@@ -32,6 +33,7 @@ const NAV_ITEM_DEFS = [
   { key: 'simulator',      path: '/simulator',    icon: <ScienceIcon /> },
   { key: 'alerts',         path: '/alerts',       icon: <NotificationsIcon /> },
   { key: 'dataSources',    path: '/data-sources', icon: <StorageIcon /> },
+  { key: 'cropRotation',   path: '/rotation',     icon: <AutorenewIcon /> },
 ];
 
 export const EXPANDED_WIDTH = 250;

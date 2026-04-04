@@ -17,6 +17,7 @@ import SmartRecommendations from './pages/SmartRecommendations';
 import Simulator from './pages/Simulator';
 import Alerts from './pages/Alerts';
 import DataSources from './pages/DataSources';
+import CropRotation from './pages/CropRotation';
 import ChatWindow from './components/ChatBot/ChatWindow';
 
 const theme = createTheme({
@@ -145,6 +146,10 @@ function AppRoutes() {
       <Route
         path="/data-sources"
         element={<ProtectedRoute><AppLayout><DataSources /></AppLayout></ProtectedRoute>}
+      />
+      <Route
+        path="/rotation"
+        element={<ProtectedRoute><AppLayout pageTitle="Crop Rotation"><CropRotation /></AppLayout></ProtectedRoute>}
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
