@@ -1,0 +1,82 @@
+/* ============================================================
+   Rotation Page – Module CSS
+   ============================================================ */
+
+/* Hero gradient */
+.hero {
+  background: linear-gradient(135deg, #065F46 0%, #10B981 60%, #34D399 100%);
+  border-radius: 16px;
+  padding: 32px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative blob */
+.heroBlob {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+}
+
+/* Feature highlight card inside hero */
+.featureCard {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: background 0.3s ease;
+}
+
+.featureCard:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Tab panel fade-in */
+.tabPanel {
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Overview quick-action card */
+.quickAction {
+  padding: 16px;
+  background: #F9FAFB;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 1px solid #E5E7EB;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.quickAction:hover {
+  background: #D1FAE5;
+  border-color: #10B981;
+  transform: translateY(-2px);
+}
+
+/* Summary strip gradient background */
+.summaryStrip {
+  background: linear-gradient(135deg, rgba(16,185,129,0.05), rgba(139,92,246,0.05));
+  border-radius: 16px;
+}
+
+/* Metric value inside summary card */
+.metricValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Progress label row */
+.progressLabelRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
