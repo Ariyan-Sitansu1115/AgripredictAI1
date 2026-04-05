@@ -22,6 +22,7 @@
       "risk": "Risk Assessment",
       "recommendations": "Smart Recommendations",
       "cropPrediction": "Crop Prediction",
+      "climatePredictor": "Climate Predictor",
       "rotation": "Crop Rotation",
       "iot": "IoT Monitoring",
       "simulator": "Simulator",
