@@ -24,7 +24,8 @@
       "simulator": "Simulator",
       "alerts": "Alerts",
       "dataSources": "Data Sources",
-      "cropRotation": "Crop Rotation"
+      "cropRotation": "Crop Rotation",
+      "climatePredictor": "Climate Predictor"
     }
   },
   "dashboard": {

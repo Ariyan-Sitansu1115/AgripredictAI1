@@ -24,7 +24,8 @@
       "simulator": "सिम्युलेटर",
       "alerts": "अलर्ट",
       "dataSources": "डेटा स्रोत",
-      "cropRotation": "फसल चक्र"
+      "cropRotation": "फसल चक्र",
+      "climatePredictor": "जलवायु फसल भविष्यवाणी"
     }
   },
   "dashboard": {
