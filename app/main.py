@@ -9,7 +9,7 @@ from app.api import (
     auth_api, profile_api, data_api, prediction_api,
     feasibility_api, profit_api, risk_api,
     recommendation_api, simulation_api, alert_api, dashboard_api,
-    chatbot_api, voice_api, debug_api, rotation_api, climate_api,
+    chatbot_api, voice_api, debug_api, rotation_api, climate_routes,
 )
 from app.api import test_api
 from app.core.config import settings
@@ -60,7 +60,7 @@ app.include_router(voice_api.router, prefix="/api/chat", tags=["Voice"])
 app.include_router(test_api.router, prefix="/api/chat", tags=["Chatbot"])
 app.include_router(debug_api.router, tags=["Debug"])
 app.include_router(rotation_api.router, prefix="/api/rotation", tags=["Rotation"])
-app.include_router(climate_api.router, prefix="/api/predict", tags=["Climate"])
+app.include_router(climate_routes.router, prefix="/api/climate", tags=["Climate"])
 
 @app.get("/health")
 async def health_check():

@@ -48,10 +48,7 @@ export default function Login() {
         navigate('/dashboard');
       } catch (err) {
         // Demo mode: allow login with any credentials since no real user database
-        // Extract error message for display, but proceed with demo mode anyway
-        let errMsg = 'Invalid credentials';
-        const errDetail = err?.response?.data?.detail;
-        
+        // Proceed with demo mode regardless of error
         if (err.response?.status === 422 || err.response?.status === 401) {
           // Backend auth failed - use demo mode
           const demoUser = { 

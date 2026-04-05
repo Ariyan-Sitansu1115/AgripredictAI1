@@ -27,7 +27,9 @@
       "iot": "IoT ନିଗରାଣି",
       "simulator": "ସିମୁଲେଟର",
       "alerts": "ସତର୍କତା",
-      "dataSources": "ତଥ୍ୟ ଉତ୍ସ"
+      "dataSources": "ତଥ୍ୟ ଉତ୍ସ",
+      "cropRotation": "ଫସଲ ଚକ୍ର",
+      "climatePredictor": "ଜଳବାୟୁ ଫସଲ ପୂର୍ବାନୁମାନ"
     }
   },
   "dashboard": {

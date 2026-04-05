@@ -1,0 +1,325 @@
+/* Climate-Resilient Crop Predictor Styles */
+
+/* ── Container ─────────────────────────────────────────────────────────── */
+.climate-predictor {
+  padding: 0;
+  animation: fadeIn 0.4s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Page header banner ─────────────────────────────────────────────────── */
+.climate-hero {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+  border-radius: 20px;
+  padding: 2rem 2.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 8px 32px rgba(6, 78, 59, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.climate-hero::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  right: -10%;
+  width: 300px;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.climate-hero-icon {
+  font-size: 3rem;
+  flex-shrink: 0;
+}
+
+.climate-hero-text h1 {
+  margin: 0 0 0.3rem;
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.climate-hero-text p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* ── Glass card ─────────────────────────────────────────────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.93);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(6, 78, 59, 0.10);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  overflow: hidden;
+}
+
+.glass-card:hover {
+  box-shadow: 0 12px 40px rgba(6, 78, 59, 0.16);
+}
+
+/* ── Form card ──────────────────────────────────────────────────────────── */
+.form-card {
+  padding: 1.5rem;
+}
+
+.form-section-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #6b7280;
+  margin: 1.2rem 0 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.form-section-title:first-child {
+  margin-top: 0;
+}
+
+/* ── Predict button ─────────────────────────────────────────────────────── */
+.predict-btn {
+  background: linear-gradient(135deg, #10b981, #047857) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  padding: 12px 24px !important;
+  font-size: 1rem !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3) !important;
+}
+
+.predict-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669, #065f46) !important;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+  transform: translateY(-1px);
+}
+
+.predict-btn:disabled {
+  opacity: 0.7 !important;
+  cursor: not-allowed;
+}
+
+/* ── Crop recommendation card ───────────────────────────────────────────── */
+.crop-card {
+  padding: 1.2rem;
+  border-left: 4px solid #10b981;
+  transition: border-color 0.2s ease;
+}
+
+.crop-card:hover {
+  border-left-color: #047857;
+}
+
+.crop-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.crop-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #065f46;
+  margin: 0;
+}
+
+.resilience-badge {
+  background: linear-gradient(135deg, #10b981, #047857);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.resilience-badge.high  { background: linear-gradient(135deg, #10b981, #047857); }
+.resilience-badge.medium { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.resilience-badge.low   { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+
+.crop-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.crop-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: #4b5563;
+}
+
+.score-bar-wrap {
+  margin-top: 0.6rem;
+}
+
+.score-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 3px;
+}
+
+.score-bar-track {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.score-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #10b981, #047857);
+  transition: width 1s ease;
+}
+
+/* ── Climate summary box ────────────────────────────────────────────────── */
+.climate-summary {
+  padding: 1.2rem;
+}
+
+.climate-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.climate-stat {
+  text-align: center;
+  padding: 0.9rem;
+  background: #f0fdf4;
+  border-radius: 12px;
+  border: 1px solid #d1fae5;
+}
+
+.climate-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #065f46;
+}
+
+.climate-stat-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* ── Explanation box ────────────────────────────────────────────────────── */
+.explanation-box {
+  padding: 1rem 1.2rem;
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  border: 1px solid #a7f3d0;
+  border-radius: 12px;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #065f46;
+  line-height: 1.6;
+}
+
+.explanation-box .icon {
+  margin-right: 0.4rem;
+}
+
+/* ── Chart container ────────────────────────────────────────────────────── */
+.chart-container {
+  padding: 1rem 0;
+}
+
+.chart-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.75rem;
+  padding: 0 1rem;
+}
+
+/* ── Loading overlay ────────────────────────────────────────────────────── */
+.loading-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  gap: 1rem;
+}
+
+.loading-overlay p {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* ── Empty state ────────────────────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.empty-state-icon {
+  font-size: 3.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.empty-state p {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  max-width: 300px;
+}
+
+/* ── Error alert ────────────────────────────────────────────────────────── */
+.error-alert {
+  padding: 0.9rem 1.1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #b91c1c;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── Responsive adjustments ─────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .climate-hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.5rem;
+  }
+
+  .climate-hero-text h1 {
+    font-size: 1.3rem;
+  }
+
+  .climate-stat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

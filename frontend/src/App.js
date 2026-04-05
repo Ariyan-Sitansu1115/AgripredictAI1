@@ -7,7 +7,6 @@ import { LanguageProvider } from './context/LanguageContext';
 import Sidebar, { EXPANDED_WIDTH, COLLAPSED_WIDTH } from './components/Layout/Sidebar';
 import Header from './components/Header/Header';
 import Login from './pages/Login';
-import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import MarketPredictions from './pages/MarketPredictions';
@@ -19,9 +18,7 @@ import Simulator from './pages/Simulator';
 import Alerts from './pages/Alerts';
 import DataSources from './pages/DataSources';
 import CropRotation from './pages/CropRotation';
-import IoTMonitoring from './pages/IoTMonitoring';
-import CropPrediction from './pages/CropPrediction';
-import ClimateCropPredictor from './pages/ClimateCropPredictor';
+import ClimatePredictor from './pages/ClimatePredictor';
 import ChatWindow from './components/ChatBot/ChatWindow';
 
 const theme = createTheme({
@@ -109,9 +106,8 @@ function AppRoutes() {
   const { isAuthenticated } = useAuth();
   return (
     <Routes>
-      <Route path="/landing" element={<Landing />} />
       <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
-      <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/landing'} replace />} />
+      <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
       <Route
         path="/dashboard"
         element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>}
@@ -141,22 +137,6 @@ function AppRoutes() {
         element={<ProtectedRoute><AppLayout><SmartRecommendations /></AppLayout></ProtectedRoute>}
       />
       <Route
-        path="/crop-prediction"
-        element={<ProtectedRoute><AppLayout><CropPrediction /></AppLayout></ProtectedRoute>}
-      />
-      <Route
-        path="/climate-predictor"
-        element={<ProtectedRoute><AppLayout><ClimateCropPredictor /></AppLayout></ProtectedRoute>}
-      />
-      <Route
-        path="/rotation"
-        element={<ProtectedRoute><AppLayout><CropRotation /></AppLayout></ProtectedRoute>}
-      />
-      <Route
-        path="/iot"
-        element={<ProtectedRoute><AppLayout><IoTMonitoring /></AppLayout></ProtectedRoute>}
-      />
-      <Route
         path="/simulator"
         element={<ProtectedRoute><AppLayout><Simulator /></AppLayout></ProtectedRoute>}
       />
@@ -167,6 +147,14 @@ function AppRoutes() {
       <Route
         path="/data-sources"
         element={<ProtectedRoute><AppLayout><DataSources /></AppLayout></ProtectedRoute>}
+      />
+      <Route
+        path="/rotation"
+        element={<ProtectedRoute><AppLayout pageTitle="Crop Rotation"><CropRotation /></AppLayout></ProtectedRoute>}
+      />
+      <Route
+        path="/climate-predictor"
+        element={<ProtectedRoute><AppLayout pageTitle="Climate Crop Predictor"><ClimatePredictor /></AppLayout></ProtectedRoute>}
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
