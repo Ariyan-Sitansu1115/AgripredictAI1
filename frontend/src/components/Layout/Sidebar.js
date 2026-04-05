@@ -21,6 +21,7 @@ import AgricultureIcon from '@mui/icons-material/Agriculture';
 import LoopIcon from '@mui/icons-material/Loop';
 import SensorsIcon from '@mui/icons-material/Sensors';
 import EmojiNatureIcon from '@mui/icons-material/EmojiNature';
+import AcUnitIcon from '@mui/icons-material/AcUnit';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { t } from '../../utils/i18n';
@@ -32,8 +33,9 @@ const NAV_ITEM_DEFS = [
   { key: 'profit',         path: '/profit',          icon: <AttachMoneyIcon /> },
   { key: 'risk',           path: '/risk',            icon: <WarningAmberIcon /> },
   { key: 'recommendations',path: '/recommendations', icon: <StarIcon /> },
-  { key: 'cropPrediction', path: '/crop-prediction', icon: <EmojiNatureIcon /> },
-  { key: 'rotation',       path: '/rotation',        icon: <LoopIcon /> },
+  { key: 'cropPrediction',     path: '/crop-prediction',    icon: <EmojiNatureIcon /> },
+  { key: 'climatePredictor',   path: '/climate-predictor',  icon: <AcUnitIcon /> },
+  { key: 'rotation',           path: '/rotation',           icon: <LoopIcon /> },
   { key: 'iot',            path: '/iot',             icon: <SensorsIcon /> },
   { key: 'simulator',      path: '/simulator',       icon: <ScienceIcon /> },
   { key: 'alerts',         path: '/alerts',          icon: <NotificationsIcon /> },

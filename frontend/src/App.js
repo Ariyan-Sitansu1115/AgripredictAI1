@@ -21,6 +21,7 @@ import DataSources from './pages/DataSources';
 import CropRotation from './pages/CropRotation';
 import IoTMonitoring from './pages/IoTMonitoring';
 import CropPrediction from './pages/CropPrediction';
+import ClimateCropPredictor from './pages/ClimateCropPredictor';
 import ChatWindow from './components/ChatBot/ChatWindow';
 
 const theme = createTheme({
@@ -142,6 +143,10 @@ function AppRoutes() {
       <Route
         path="/crop-prediction"
         element={<ProtectedRoute><AppLayout><CropPrediction /></AppLayout></ProtectedRoute>}
+      />
+      <Route
+        path="/climate-predictor"
+        element={<ProtectedRoute><AppLayout><ClimateCropPredictor /></AppLayout></ProtectedRoute>}
       />
       <Route
         path="/rotation"

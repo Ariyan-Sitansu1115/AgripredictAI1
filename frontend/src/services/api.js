@@ -205,6 +205,12 @@ export const chatbotService = {
   testConnection: () => api.post('/api/chat/test', { message: 'ping' }),
 };
 
+// Climate Crop Predictor
+export const climateService = {
+  predictFutureCrops: (data) => api.post('/api/predict/future-crops', data),
+  listCrops: () => api.get('/api/predict/future-crops/crops'),
+};
+
 // Health
 export const healthService = {
   check: () => api.get('/health'),
