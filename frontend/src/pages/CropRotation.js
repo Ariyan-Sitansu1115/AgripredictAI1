@@ -39,11 +39,11 @@ const RADAR_DATA = [
 ];
 
 const ROTATION_HISTORY = [
-  { season: 'Kharif 2022', crop: 'Rice', yield: 5.2, profit: '₹48,000', health: 72 },
-  { season: 'Rabi 2022', crop: 'Wheat', yield: 4.8, profit: '₹42,000', health: 78 },
-  { season: 'Kharif 2023', crop: 'Maize', yield: 6.1, profit: '₹55,000', health: 82 },
-  { season: 'Rabi 2023', crop: 'Mustard', yield: 2.3, profit: '₹38,000', health: 85 },
-  { season: 'Kharif 2024', crop: 'Cotton', yield: 3.5, profit: '₹71,000', health: 88 },
+  { season: 'Kharif 2022', crop: 'Rice', yield: 5.2, profit: '₹48,000', profitNum: 48000, health: 72 },
+  { season: 'Rabi 2022', crop: 'Wheat', yield: 4.8, profit: '₹42,000', profitNum: 42000, health: 78 },
+  { season: 'Kharif 2023', crop: 'Maize', yield: 6.1, profit: '₹55,000', profitNum: 55000, health: 82 },
+  { season: 'Rabi 2023', crop: 'Mustard', yield: 2.3, profit: '₹38,000', profitNum: 38000, health: 85 },
+  { season: 'Kharif 2024', crop: 'Cotton', yield: 3.5, profit: '₹71,000', profitNum: 71000, health: 88 },
 ];
 
 const TREND_DATA = [
@@ -346,7 +346,7 @@ function HistoricalAnalytics() {
                 <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => `₹${v / 1000}k`} />
                 <YAxis dataKey="season" type="category" tick={{ fontSize: 10 }} width={80} />
                 <RechartTooltip formatter={(v) => [`₹${v.toLocaleString()}`, 'Profit']} />
-                <Bar dataKey="health" fill="#10B981" radius={[0, 4, 4, 0]} name="Soil Health">
+                <Bar dataKey="profitNum" fill="#10B981" radius={[0, 4, 4, 0]} name="Net Profit">
                   {ROTATION_HISTORY.map((entry, i) => (
                     <Cell key={i} fill={['#10B981', '#3B82F6', '#F59E0B', '#8B5CF6', '#EF4444'][i % 5]} />
                   ))}
