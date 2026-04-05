@@ -44,9 +44,7 @@ _engine = CropRecommendationEngine()
 def predict_future_crops(payload: FutureCropRequest) -> FutureCropResponse:
     """Generate climate-resilient crop recommendations for a location."""
     logger.info(
-        "predict_future_crops | lat=%.4f lon=%.4f year=%d",
-        payload.latitude,
-        payload.longitude,
+        "predict_future_crops | year=%d",
         payload.target_year,
     )
 
@@ -89,7 +87,7 @@ def get_climate_trends(
     lon: float = Path(..., ge=-180, le=180, description="Longitude"),
 ) -> ClimateTrendsResponse:
     """Retrieve climate trend data for a location."""
-    logger.info("get_climate_trends | lat=%.4f lon=%.4f", lat, lon)
+    logger.info("get_climate_trends requested")
 
     try:
         loader = _engine.data_loader
@@ -146,12 +144,7 @@ def get_climate_trends(
 )
 def check_crop_adaptability(payload: CropAdaptabilityRequest) -> CropAdaptabilityResponse:
     """Assess how a specific crop adapts to future climate conditions."""
-    logger.info(
-        "check_crop_adaptability | crop=%s lat=%.4f lon=%.4f",
-        payload.crop_name,
-        payload.latitude,
-        payload.longitude,
-    )
+    logger.info("check_crop_adaptability | crop=%s year=%d", payload.crop_name, payload.target_year)
 
     try:
         result = _engine.check_crop_adaptability(

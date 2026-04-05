@@ -59,10 +59,7 @@ class CropRecommendationEngine:
         Returns:
             Dict with recommended_crops, future_climate_summary, and explanation.
         """
-        logger.info(
-            "Generating recommendations | lat=%.4f lon=%.4f year=%d",
-            latitude, longitude, target_year,
-        )
+        logger.info("Generating recommendations | year=%d", target_year)
 
         # ── Step 1: Load historical climate data ────────────────────────
         historical = self.data_loader.load_historical_climate_data(latitude, longitude)
@@ -173,8 +170,10 @@ class CropRecommendationEngine:
             latitude, longitude, target_year=target_year
         )
 
-        current_rainfall_monthly = historical["rainfall_avg"] / 12
-        future_rainfall_monthly = projected_climate["projected_rainfall"] / 12
+        # rainfall_avg and projected_rainfall are both monthly mm values – no
+        # further division is needed.
+        current_rainfall_monthly = historical["rainfall_avg"]
+        future_rainfall_monthly = projected_climate["projected_rainfall"]
 
         return self.suitability_matcher.get_crop_adaptability(
             crop_name=crop_name,

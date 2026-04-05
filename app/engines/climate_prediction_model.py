@@ -229,16 +229,15 @@ class ClimatePredictionModel:
 
         # Project forward: fill each future month with its annual mean estimate
         last_year_idx = n_complete_years - 1
+        last_year_data = series[-12:]
+        last_year_mean = float(np.mean(last_year_data))
         forecast = []
         for month in range(n_months_ahead):
             year_ahead = (month // 12) + 1
             projected_annual_mean = intercept + slope * (last_year_idx + year_ahead)
-            # Re-add seasonal deviation from the representative cycle
+            # Re-add the seasonal deviation from the last complete annual cycle
             seasonal_month = month % 12
-            last_cycle = series[-(12 - seasonal_month): ] if seasonal_month > 0 else series[-12:]
-            # Use last complete year's seasonal pattern minus its mean
-            last_year_data = series[-12:]
-            seasonal_dev = float(last_year_data[seasonal_month] - np.mean(last_year_data))
+            seasonal_dev = float(last_year_data[seasonal_month] - last_year_mean)
             forecast.append(projected_annual_mean + seasonal_dev)
 
         return np.array(forecast)
