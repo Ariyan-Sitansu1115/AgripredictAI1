@@ -2,6 +2,7 @@
 AgriPredictAI Backend - FastAPI Entry Point
 """
 import logging
+from sqlalchemy import inspect, text
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,10 +27,33 @@ app = FastAPI(
 )
 
 
+def _run_migrations() -> None:
+    """Apply incremental schema migrations that create_all cannot handle.
+
+    Runs on every startup and performs idempotent checks before applying
+    migrations. Each migration is a no-op if the change is already present,
+    so it is safe to run on every startup and across multiple instances.
+    """
+    inspector = inspect(engine)
+    # Add 'username' column to 'users' table if it was created before this field was added
+    if "users" in inspector.get_table_names():
+        existing_cols = {col["name"] for col in inspector.get_columns("users")}
+        if "username" not in existing_cols:
+            try:
+                with engine.connect() as conn:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN username VARCHAR(120)"))
+                    conn.commit()
+                _startup_logger.info("Migration applied: added 'username' column to 'users' table")
+            except Exception as exc:  # noqa: BLE001
+                # Column may have been added by a concurrent instance; log and continue
+                _startup_logger.warning("Migration 'add username column' skipped (may already exist): %s", exc)
+
+
 @app.on_event("startup")
 def on_startup() -> None:
     """Create database tables on startup if they do not exist."""
     Base.metadata.create_all(bind=engine)
+    _run_migrations()
     _startup_logger.info(
         "AgriPredictAI backend started | CORS origins: %s",
         settings.CORS_ORIGINS,
