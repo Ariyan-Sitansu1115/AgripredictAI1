@@ -1,0 +1,635 @@
+/*
+ * ChatWindow.css – Standalone CSS for the Farmer Assistant Chatbot
+ *
+ * Design System:
+ *   - Glassmorphism card effects
+ *   - Green gradient (AgriPredict brand)
+ *   - Smooth animations
+ *   - Mobile-responsive layout
+ *   - Accessible colour contrast
+ *
+ * Usage:
+ *   import '../styles/ChatWindow.css';
+ */
+
+/* ============================================================
+   CSS Custom Properties (Design Tokens)
+   ============================================================ */
+:root {
+  --chat-green-light:  #10B981;
+  --chat-green-dark:   #047857;
+  --chat-green-mid:    #059669;
+  --chat-bg:           #f8fffe;
+  --chat-border:       rgba(16, 185, 129, 0.2);
+  --chat-shadow:       0 20px 60px rgba(0, 0, 0, 0.2);
+  --chat-radius-lg:    20px;
+  --chat-radius-md:    16px;
+  --chat-radius-sm:    8px;
+  --chat-font-size:    13.5px;
+  --chat-transition:   0.25s ease;
+  --chat-z-index:      1300;
+  --chat-width:        400px;
+  --chat-height:       600px;
+}
+
+/* ============================================================
+   Floating Action Button (FAB)
+   ============================================================ */
+.cw-fab {
+  position: fixed !important;
+  bottom: 28px;
+  right: 28px;
+  z-index: var(--chat-z-index);
+  width: 62px !important;
+  height: 62px !important;
+  background: linear-gradient(135deg, var(--chat-green-light) 0%, var(--chat-green-dark) 100%) !important;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.55) !important;
+  transition: transform var(--chat-transition), box-shadow var(--chat-transition) !important;
+  border: none;
+  cursor: pointer;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: white !important;
+}
+
+.cw-fab:hover {
+  transform: scale(1.12) !important;
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.65) !important;
+}
+
+.cw-fab:active {
+  transform: scale(0.96) !important;
+}
+
+/* Unread badge */
+.cw-fab-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 2px solid white;
+  font-size: 9px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+/* ============================================================
+   Chat Window Container
+   ============================================================ */
+.cw-window {
+  position: fixed !important;
+  bottom: 104px;
+  right: 28px;
+  width: var(--chat-width);
+  max-width: calc(100vw - 48px);
+  height: var(--chat-height);
+  max-height: calc(100vh - 130px);
+  z-index: var(--chat-z-index);
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--chat-radius-lg) !important;
+  overflow: hidden;
+  box-shadow: var(--chat-shadow) !important;
+  animation: cw-slide-up var(--chat-transition);
+  background: white;
+
+  /* Glassmorphism base */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+@keyframes cw-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ============================================================
+   Header
+   ============================================================ */
+.cw-header {
+  background: linear-gradient(135deg, var(--chat-green-light) 0%, var(--chat-green-dark) 100%);
+  color: white;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  min-height: 64px;
+}
+
+.cw-header-left {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.cw-avatar {
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.cw-header-title {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  color: white !important;
+}
+
+.cw-header-subtitle {
+  font-size: 11px !important;
+  opacity: 0.85 !important;
+  color: white !important;
+  line-height: 1.2 !important;
+}
+
+.cw-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #86efac;
+  display: inline-block;
+  margin-right: 4px;
+  animation: cw-pulse-dot 2s infinite;
+}
+
+@keyframes cw-pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.cw-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cw-icon-btn {
+  color: rgba(255, 255, 255, 0.85) !important;
+  transition: color var(--chat-transition), background var(--chat-transition) !important;
+  border-radius: var(--chat-radius-sm) !important;
+}
+
+.cw-icon-btn:hover {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ============================================================
+   Messages Area
+   ============================================================ */
+.cw-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 12px;
+  background: var(--chat-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
+}
+
+.cw-messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.cw-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cw-messages::-webkit-scrollbar-thumb {
+  background: #bbf7d0;
+  border-radius: 4px;
+}
+
+.cw-messages::-webkit-scrollbar-thumb:hover {
+  background: #6ee7b7;
+}
+
+/* Empty state */
+.cw-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: #9ca3af;
+  gap: 10px;
+  font-size: 13px;
+  text-align: center;
+  padding: 24px 20px;
+}
+
+.cw-empty-icon {
+  font-size: 48px;
+  opacity: 0.45;
+}
+
+/* ============================================================
+   Message Bubbles
+   ============================================================ */
+.cw-bubble {
+  display: flex;
+  flex-direction: column;
+  max-width: 86%;
+}
+
+.cw-bubble--user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.cw-bubble--assistant {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.cw-bubble-content {
+  padding: 10px 14px;
+  border-radius: var(--chat-radius-md);
+  font-size: var(--chat-font-size);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.cw-bubble--user .cw-bubble-content {
+  background: linear-gradient(135deg, var(--chat-green-light), var(--chat-green-dark));
+  color: white;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+.cw-bubble--assistant .cw-bubble-content {
+  background: white;
+  color: #1f2937;
+  border-bottom-left-radius: 4px;
+  border: 1px solid #e5f7ef;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.06);
+}
+
+.cw-bubble-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+  padding: 0 4px;
+}
+
+.cw-time {
+  font-size: 10px;
+  color: #9ca3af;
+}
+
+/* ============================================================
+   Typing Indicator
+   ============================================================ */
+.cw-typing {
+  align-self: flex-start;
+}
+
+.cw-typing-bubble {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 16px;
+  background: white;
+  border-radius: var(--chat-radius-md);
+  border-bottom-left-radius: 4px;
+  border: 1px solid #e5f7ef;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.06);
+  width: fit-content;
+}
+
+.cw-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--chat-green-light);
+  animation: cw-bounce 1.3s infinite ease-in-out;
+}
+
+.cw-dot:nth-child(2) { animation-delay: 0.18s; }
+.cw-dot:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes cw-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.8; }
+  30% { transform: translateY(-7px); opacity: 1; }
+}
+
+/* ============================================================
+   Structured Data Card
+   ============================================================ */
+.cw-data-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 10px 13px;
+  margin-top: 8px;
+  font-size: 12px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.cw-data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 0;
+  border-bottom: 1px solid #dcfce7;
+}
+
+.cw-data-row:last-child {
+  border-bottom: none;
+}
+
+.cw-data-label {
+  color: #6b7280;
+  font-size: 11.5px;
+}
+
+.cw-data-value {
+  font-weight: 600;
+  color: #065f46;
+  font-size: 12px;
+}
+
+/* ============================================================
+   Suggestion Pills
+   ============================================================ */
+.cw-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 0 6px;
+  align-self: flex-start;
+  max-width: 96%;
+}
+
+.cw-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border-radius: 20px;
+  border: 1.5px solid var(--chat-green-light);
+  color: var(--chat-green-dark);
+  background: white;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background var(--chat-transition),
+    box-shadow var(--chat-transition),
+    transform var(--chat-transition);
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+}
+
+.cw-chip:hover {
+  background: #ecfdf5;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+  transform: translateY(-1px);
+}
+
+.cw-chip:active {
+  transform: translateY(0);
+}
+
+/* ============================================================
+   Input Area
+   ============================================================ */
+.cw-input-area {
+  padding: 10px 12px;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+  min-height: 56px;
+}
+
+.cw-textarea {
+  flex: 1;
+  border: 1.5px solid #d1fae5;
+  border-radius: 20px;
+  padding: 9px 14px;
+  font-size: var(--chat-font-size);
+  outline: none;
+  background: #f9fffe;
+  resize: none;
+  font-family: inherit;
+  max-height: 100px;
+  overflow-y: auto;
+  transition: border-color var(--chat-transition), background var(--chat-transition);
+  line-height: 1.4;
+}
+
+.cw-textarea:focus {
+  border-color: var(--chat-green-light);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.cw-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cw-textarea::placeholder {
+  color: #b0b9c4;
+}
+
+.cw-send-btn {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, var(--chat-green-light), var(--chat-green-dark)) !important;
+  color: white !important;
+  flex-shrink: 0;
+  transition: transform var(--chat-transition), box-shadow var(--chat-transition) !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35) !important;
+}
+
+.cw-send-btn:hover:not(:disabled) {
+  transform: scale(1.08) !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45) !important;
+}
+
+.cw-send-btn:disabled {
+  background: #e5e7eb !important;
+  box-shadow: none !important;
+  color: #9ca3af !important;
+}
+
+/* ============================================================
+   Risk / Demand Badges
+   ============================================================ */
+.cw-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.cw-badge--low      { background: #dcfce7; color: #166534; }
+.cw-badge--medium   { background: #fef9c3; color: #854d0e; }
+.cw-badge--high     { background: #fee2e2; color: #991b1b; }
+.cw-badge--critical { background: #fce7f3; color: #9d174d; }
+.cw-badge--up       { background: #dcfce7; color: #166534; }
+.cw-badge--down     { background: #fee2e2; color: #991b1b; }
+.cw-badge--stable   { background: #f3f4f6; color: #374151; }
+
+/* ============================================================
+   Profitability Bar
+   ============================================================ */
+.cw-profit-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cw-profit-bar {
+  width: 72px;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.cw-profit-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--chat-green-light), var(--chat-green-dark));
+  transition: width 0.6s ease;
+}
+
+/* ============================================================
+   Error Banner
+   ============================================================ */
+.cw-error-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-align: center;
+  margin: 4px 0;
+}
+
+/* ============================================================
+   Language Selector
+   ============================================================ */
+.cw-lang-select {
+  font-size: 11px !important;
+  min-width: 72px !important;
+  color: white !important;
+}
+
+/* ============================================================
+   Responsive – Tablet (≤ 600px)
+   ============================================================ */
+@media (max-width: 600px) {
+  :root {
+    --chat-width: 90vw;
+    --chat-height: 70vh;
+  }
+
+  .cw-window {
+    right: 50%;
+    transform: translateX(50%);
+    bottom: 90px;
+  }
+
+  .cw-fab {
+    bottom: 16px !important;
+    right: 16px !important;
+  }
+
+  .cw-chip {
+    max-width: 160px;
+  }
+}
+
+/* ============================================================
+   Responsive – Mobile (≤ 390px)
+   ============================================================ */
+@media (max-width: 390px) {
+  :root {
+    --chat-width: 94vw;
+    --chat-height: 72vh;
+  }
+
+  .cw-window {
+    right: 50%;
+    bottom: 80px;
+  }
+
+  .cw-header {
+    padding: 10px 12px;
+    min-height: 56px;
+  }
+
+  .cw-header-title {
+    font-size: 14px !important;
+  }
+
+  .cw-header-subtitle {
+    display: none;
+  }
+
+  .cw-messages {
+    padding: 10px 8px;
+  }
+}
+
+/* ============================================================
+   Accessibility – Reduced Motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .cw-window        { animation: none; }
+  .cw-fab           { transition: none !important; }
+  .cw-dot           { animation: none; }
+  .cw-status-dot    { animation: none; }
+  .cw-profit-fill   { transition: none; }
+  .cw-chip          { transition: none; }
+}
+
+/* ============================================================
+   Accessibility – High Contrast
+   ============================================================ */
+@media (forced-colors: active) {
+  .cw-bubble--user .cw-bubble-content   { border: 1px solid ButtonText; }
+  .cw-bubble--assistant .cw-bubble-content { border: 1px solid ButtonText; }
+  .cw-chip { border-color: ButtonText; color: ButtonText; }
+}
