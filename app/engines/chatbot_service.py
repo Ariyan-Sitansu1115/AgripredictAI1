@@ -29,8 +29,6 @@ logger = logging.getLogger("chatbot_engine")
 # Constants
 # ---------------------------------------------------------------------------
 
-_CURRENT_MONTH = datetime.now().month
-
 # Maps numeric month → season name used in the crop DB
 _MONTH_TO_SEASON: Dict[int, str] = {
     1: "Rabi", 2: "Rabi", 3: "Rabi",
@@ -44,6 +42,16 @@ _MONTH_NAMES = [
     "", "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
 ]
+
+# Price forecast multipliers (assumes ±2% weekly change when trend is UP/DOWN)
+_PRICE_TREND_MULTIPLIER_UP: float = 1.02
+_PRICE_TREND_MULTIPLIER_DOWN: float = 0.98
+_PRICE_TREND_MULTIPLIER_STABLE: float = 1.0
+# Number of weekly periods for monthly forecast (approx. 4.3 weeks per month, rounded to 3)
+_PRICE_FORECAST_WEEKS_IN_MONTH: int = 3
+
+# Divisor to convert ₹ per hectare revenue to thousands (₹K) for display
+_REVENUE_DISPLAY_DIVISOR: int = 1000
 
 
 # ---------------------------------------------------------------------------
@@ -753,10 +761,13 @@ class FarmerAssistantChatbot:
         price = price_info["price"]
         trend = price_info["trend"]
         trend_icon = "📈" if trend == "UP" else ("📉" if trend == "DOWN" else "➡️")
-        trend_pct = 1.02 if trend == "UP" else (0.98 if trend == "DOWN" else 1.0)
+        trend_pct = (
+            _PRICE_TREND_MULTIPLIER_UP if trend == "UP" else
+            (_PRICE_TREND_MULTIPLIER_DOWN if trend == "DOWN" else _PRICE_TREND_MULTIPLIER_STABLE)
+        )
 
         forecast_week = round(price * trend_pct, 2)
-        forecast_month = round(price * (trend_pct ** 3), 2)
+        forecast_month = round(price * (trend_pct ** _PRICE_FORECAST_WEEKS_IN_MONTH), 2)
 
         mssp_line = ""
         if price_info.get("mssp"):
@@ -1060,8 +1071,8 @@ class FarmerAssistantChatbot:
                 y_min, y_max = info["yield_kg_ha"]
                 price_info = self._prices.get(crop, {})
                 price = price_info.get("price", 0)
-                revenue_min = round(y_min * price / 1000, 0)
-                revenue_max = round(y_max * price / 1000, 0)
+                revenue_min = round(y_min * price / _REVENUE_DISPLAY_DIVISOR, 0)
+                revenue_max = round(y_max * price / _REVENUE_DISPLAY_DIVISOR, 0)
                 response = (
                     f"📊 **Yield Information for {crop}**\n\n"
                     f"🌾 **Expected Yield:** {y_min:,} – {y_max:,} kg/ha\n"
