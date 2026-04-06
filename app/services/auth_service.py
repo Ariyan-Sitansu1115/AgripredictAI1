@@ -33,6 +33,7 @@ class AuthService:
 
         user = User(
             email=payload.email,
+            username=payload.username,
             hashed_password=hash_password(payload.password),
         )
         self.db.add(user)

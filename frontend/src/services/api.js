@@ -83,9 +83,13 @@ api.interceptors.response.use(
       }
     }
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Only redirect to login if the failing request is NOT an auth endpoint itself
+      const url = error.config?.url || '';
+      if (!url.includes('/api/auth/')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

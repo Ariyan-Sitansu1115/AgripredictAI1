@@ -12,13 +12,13 @@ import { useAuth } from '../context/AuthContext';
 
 const loginSchema = Yup.object({
   email: Yup.string().email('Invalid email').required('Email is required'),
-  password: Yup.string().min(6, 'Min 6 characters').required('Password is required'),
+  password: Yup.string().min(8, 'Min 8 characters').required('Password is required'),
 });
 
 const registerSchema = Yup.object({
   name: Yup.string().min(2, 'Min 2 characters').required('Name is required'),
   email: Yup.string().email('Invalid email').required('Email is required'),
-  password: Yup.string().min(6, 'Min 6 characters').required('Password is required'),
+  password: Yup.string().min(8, 'Min 8 characters').required('Password is required'),
 });
 
 export default function Login() {
@@ -27,6 +27,7 @@ export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   const formik = useFormik({
     initialValues: { name: '', email: '', password: '' },
@@ -34,41 +35,39 @@ export default function Login() {
     enableReinitialize: true,
     onSubmit: async (values, { setSubmitting }) => {
       setError('');
+      setSuccessMsg('');
       try {
-        let res;
         if (isRegister) {
-          res = await authService.register({ name: values.name, email: values.email, password: values.password });
+          await authService.register({
+            username: values.name,
+            email: values.email,
+            password: values.password,
+          });
+          setSuccessMsg('Account created! Please sign in with your credentials.');
+          setIsRegister(false);
+          formik.resetForm();
         } else {
-          res = await authService.login({ email: values.email, password: values.password });
-        }
-        const data = res.data;
-        const token = data.access_token || data.token || 'demo-token';
-        const user = data.user || { email: values.email, name: values.name || values.email };
-        login(token, user);
-        navigate('/dashboard');
-      } catch (err) {
-        // Demo mode: allow login with any credentials since no real user database
-        // Proceed with demo mode regardless of error
-        if (err.response?.status === 422 || err.response?.status === 401) {
-          // Backend auth failed - use demo mode
-          const demoUser = { 
-            email: values.email, 
-            name: values.name || values.email.split('@')[0], 
-            location: 'Maharashtra' 
-          };
-          login('demo-token-' + Date.now(), demoUser);
+          const res = await authService.login({ email: values.email, password: values.password });
+          const data = res.data;
+          const token = data.access_token;
+          const user = { email: values.email, name: values.email.split('@')[0] };
+          login(token, user);
           navigate('/dashboard');
-          return;
         }
-        
-        // If any other error, proceed with demo mode (network error, etc.)
-        const demoUser = { 
-          email: values.email, 
-          name: values.name || values.email.split('@')[0], 
-          location: 'Maharashtra' 
-        };
-        login('demo-token-' + Date.now(), demoUser);
-        navigate('/dashboard');
+      } catch (err) {
+        const status = err.response?.status;
+        const detail = err.response?.data?.detail;
+        if (status === 409) {
+          setError('An account with this email already exists. Please sign in.');
+        } else if (status === 401) {
+          setError('Invalid email or password. Please check your credentials and try again.');
+        } else if (status === 422) {
+          setError('Please check your input. Password must be at least 8 characters.');
+        } else if (!err.response) {
+          setError('Cannot connect to the server. Please make sure the backend is running.');
+        } else {
+          setError(typeof detail === 'string' ? detail : 'Something went wrong. Please try again.');
+        }
       }
       setSubmitting(false);
     },
@@ -99,6 +98,12 @@ export default function Login() {
           <Typography variant="h6" fontWeight={600} mb={2} textAlign="center">
             {isRegister ? 'Create Account' : 'Welcome Back'}
           </Typography>
+
+          {successMsg && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {successMsg}
+            </Alert>
+          )}
 
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -172,7 +177,7 @@ export default function Login() {
               {isRegister ? 'Already have an account?' : "Don't have an account?"}
             </Typography>
             <Button
-              onClick={() => { setIsRegister(!isRegister); setError(''); formik.resetForm(); }}
+              onClick={() => { setIsRegister(!isRegister); setError(''); setSuccessMsg(''); formik.resetForm(); }}
               sx={{ textTransform: 'none', fontWeight: 600 }}
             >
               {isRegister ? 'Sign In' : 'Register'}
