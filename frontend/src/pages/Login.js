@@ -50,7 +50,7 @@ export default function Login() {
           const res = await authService.login({ email: values.email, password: values.password });
           const data = res.data;
           const token = data.access_token;
-          const user = { email: values.email, name: values.email.split('@')[0] };
+          const user = { email: values.email, name: data.username || values.email.split('@')[0] };
           login(token, user);
           navigate('/dashboard');
         }

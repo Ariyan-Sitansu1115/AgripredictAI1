@@ -62,7 +62,11 @@ class AuthService:
             expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
         )
         refresh_token = create_refresh_token(data=subject)
-        return TokenResponse(access_token=access_token, refresh_token=refresh_token)
+        return TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            username=user.username,
+        )
 
     def refresh_access_token(self, refresh_token: str) -> TokenResponse:
         payload = decode_token(refresh_token)
