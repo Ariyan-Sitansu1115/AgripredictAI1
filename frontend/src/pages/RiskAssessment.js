@@ -65,6 +65,24 @@ function RiskGauge({ score, size = 120 }) {
   );
 }
 
+const transformRiskApiResponse = (data) => {
+  if (!data || !data.risk_factors) return null;
+  const rf = data.risk_factors;
+  const factors = [
+    { name: 'Price Drop Risk', score: Math.round((rf.price_drop_risk || 0) * 10) },
+    { name: 'Oversupply Risk', score: Math.round((rf.oversupply_risk || 0) * 10) },
+    { name: 'Weather Risk', score: Math.round((rf.weather_risk || 0) * 10) },
+    { name: 'Market Volatility', score: Math.round((rf.market_volatility || 0) * 10) },
+  ];
+  return {
+    crop: data.crop,
+    overall_risk: data.risk_level || 'MEDIUM',
+    overall_score: Math.round((data.overall_risk_score || 0) * 10),
+    factors,
+    mitigation: data.mitigation_strategies || [],
+  };
+};
+
 export default function RiskAssessment() {
   const [crop, setCrop] = useState('Rice');
   const [risk, setRisk] = useState(null);
@@ -73,14 +91,17 @@ export default function RiskAssessment() {
   const assess = () => {
     setLoading(true);
     riskService.assess({ crop })
-      .then((res) => setRisk(res.data))
+      .then((res) => {
+        const transformed = transformRiskApiResponse(res.data);
+        setRisk(transformed || getMockRisk(crop));
+      })
       .catch(() => setRisk(getMockRisk(crop)))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => { assess(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const radarData = risk?.factors.map((f) => ({ subject: f.name.split(' ')[0], score: f.score })) || [];
+  const radarData = risk?.factors?.map((f) => ({ subject: f.name.split(' ')[0], score: f.score })) || [];
 
   return (
     <Box>

@@ -61,6 +61,29 @@ const MOCK_RECOMMENDATIONS = [
 const SEASONS = ['All Seasons', 'Kharif', 'Rabi', 'Zaid'];
 const RISK_FILTERS = ['All Risk Levels', 'LOW', 'MEDIUM', 'HIGH'];
 
+const CROP_SEASON_MAP = {
+  Rice: 'Kharif', Wheat: 'Rabi', Maize: 'Kharif', Cotton: 'Kharif',
+  Sugarcane: 'Kharif', Potato: 'Rabi', Onion: 'Rabi', Tomato: 'Kharif',
+  Cabbage: 'Rabi', Carrot: 'Rabi',
+};
+
+const riskLevelFromScore = (score) => {
+  if (score <= 3.0) return 'LOW';
+  if (score <= 5.5) return 'MEDIUM';
+  return 'HIGH';
+};
+
+const transformApiRecommendation = (rec, index) => ({
+  rank: rec.recommendation_rank || (index + 1),
+  crop: rec.crop_name || rec.crop || 'Unknown',
+  expected_profit: rec.expected_profit || `₹${Math.round((rec.profit_score || 0) * 1000).toLocaleString('en-IN')}`,
+  risk_level: rec.risk_level || riskLevelFromScore(rec.risk_score || 0),
+  feasibility_score: Math.round(rec.feasibility_score || 0),
+  market_demand: rec.market_demand || ((rec.combined_score || 0) > 65 ? 'High' : 'Medium'),
+  best_season: rec.best_season || CROP_SEASON_MAP[rec.crop_name] || CROP_SEASON_MAP[rec.crop] || 'Kharif',
+  reasons: rec.reasons || [],
+});
+
 export default function SmartRecommendations() {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -74,7 +97,14 @@ export default function SmartRecommendations() {
     if (riskFilter !== 'All Risk Levels') params.risk_level = riskFilter;
 
     recommendationService.getSmart(params)
-      .then((res) => setRecommendations(res.data?.recommendations || MOCK_RECOMMENDATIONS))
+      .then((res) => {
+        const raw = res.data?.recommendations;
+        if (raw && raw.length) {
+          setRecommendations(raw.map((rec, i) => transformApiRecommendation(rec, i)));
+        } else {
+          setRecommendations(MOCK_RECOMMENDATIONS);
+        }
+      })
       .catch(() => setRecommendations(MOCK_RECOMMENDATIONS))
       .finally(() => setLoading(false));
   };
